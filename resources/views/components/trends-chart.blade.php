@@ -3,7 +3,7 @@
     
     <div class="h-[280px] w-full relative">
         <!-- Loading State -->
-        <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10 rounded-xl">
+        <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm z-10 rounded-xl">
             <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-500"></i>
         </div>
 
@@ -19,9 +19,16 @@
             marketId: config.marketId,
             days: config.days,
             loading: true,
+            darkMode: Alpine.store('theme').darkMode, // Access dark mode from global store
             chart: null,
 
             async init() {
+                // Register watch for dark mode
+                this.$watch('$store.theme.darkMode', (val) => {
+                    this.darkMode = val;
+                    this.updateChartColors();
+                });
+
                 // Initialize Chart
                 const ctx = this.$refs.chartCanvas.getContext('2d');
                 
@@ -59,7 +66,9 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)', // slate-900
+                                backgroundColor: this.darkMode ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                                titleColor: this.darkMode ? '#94a3b8' : '#334155',
+                                bodyColor: this.darkMode ? '#ffffff' : '#1f2937',
                                 titleFont: { family: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', size: 10 },
                                 bodyFont: { family: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif', size: 14, weight: 'bold' },
                                 padding: 10,
@@ -75,13 +84,13 @@
                         scales: {
                             x: {
                                 grid: { display: false, drawBorder: false },
-                                ticks: { font: { size: 10 }, color: '#94a3b8', maxTicksLimit: 7 }
+                                ticks: { font: { size: 10, color: this.darkMode ? '#94a3b8' : '#64748b' }, color: this.darkMode ? '#94a3b8' : '#64748b', maxTicksLimit: 7 }
                             },
                             y: {
-                                grid: { color: '#f1f5f9', drawBorder: false },
+                                grid: { color: this.darkMode ? '#1e293b' : '#e2e8f0', drawBorder: false },
                                 ticks: {
-                                    font: { family: 'ui-monospace' },
-                                    color: '#64748b',
+                                    font: { family: 'ui-monospace', color: this.darkMode ? '#64748b' : '#475569' },
+                                    color: this.darkMode ? '#64748b' : '#475569',
                                     callback: function(value) { return 'Rs. ' + value; }
                                 }
                             }
@@ -115,6 +124,16 @@
                 } finally {
                     this.loading = false;
                 }
+            },
+
+            updateChartColors() {
+                this.chart.options.plugins.tooltip.backgroundColor = this.darkMode ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.9)';
+                this.chart.options.plugins.tooltip.titleColor = this.darkMode ? '#94a3b8' : '#334155';
+                this.chart.options.plugins.tooltip.bodyColor = this.darkMode ? '#ffffff' : '#1f2937';
+                this.chart.options.scales.x.ticks.color = this.darkMode ? '#94a3b8' : '#64748b';
+                this.chart.options.scales.y.grid.color = this.darkMode ? '#1e293b' : '#e2e8f0';
+                this.chart.options.scales.y.ticks.color = this.darkMode ? '#64748b' : '#475569';
+                this.chart.update();
             }
         }));
     });

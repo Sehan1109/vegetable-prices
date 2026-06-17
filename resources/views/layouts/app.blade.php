@@ -3,28 +3,67 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sri Lanka Daily Vegetable Prices</title>
+    <title>@yield('title', 'Sri Lanka Daily Vegetable Prices')</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-black text-slate-100 min-h-screen font-sans">
-    
-    <div class="fixed inset-0 bg-black -z-10" style="background-image: radial-gradient(circle at center, #111827 0%, #000 100%);"></div>
+<body x-data="PriceApp()" class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen font-sans transition-colors duration-500">
 
-    <div id="app-container" x-data="PriceApp()" class="relative z-10">
+    <div class="fixed inset-0 -z-10 transition-colors duration-700" 
+         :style="$store.theme.darkMode 
+            ? 'background: radial-gradient(circle at center, #111827 0%, #000 100%)' 
+            : 'background: radial-gradient(circle at center, #e2e8f0 0%, #f1f5f9 100%)'"></div>
+
+    <div id="app-container" class="relative z-10">
         @yield('content')
     </div>
 
     <script>
         document.addEventListener('alpine:init', () => {
+            // Safe storage helper to prevent crashes when storage is blocked
+            const safeStorage = {
+                get(key) {
+                    try {
+                        return localStorage.getItem(key);
+                    } catch (e) {
+                        console.warn('Storage access blocked:', e);
+                        return null;
+                    }
+                },
+                set(key, value) {
+                    try {
+                        localStorage.setItem(key, value);
+                    } catch (e) {}
+                }
+            };
+
+            // Register Global Theme Store FIRST
+            Alpine.store('theme', {
+                darkMode: safeStorage.get('darkMode') === 'true' || 
+                          (!(safeStorage.get('darkMode')) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+                
+                init() {
+                    // Sync the html class on page load
+                    document.documentElement.classList.toggle('dark', this.darkMode);
+                },
+
+                toggle() {
+                    console.log('Theme toggle clicked. Current darkMode:', this.darkMode);
+                    this.darkMode = !this.darkMode;
+                    safeStorage.set('darkMode', this.darkMode);
+                    document.documentElement.classList.toggle('dark', this.darkMode);
+                    window.dispatchEvent(new CustomEvent('theme-changed', { detail: this.darkMode }));
+                }
+            });
+
+            // Main Application Data
             Alpine.data('PriceApp', () => ({
-                lang: localStorage.getItem('lang') || '{{ request()->query('lang', 'en') }}',
+                lang: safeStorage.get('lang') || '{{ request()->query('lang', 'en') }}',
                 
                 translations: {
                     en: { 
@@ -50,13 +89,15 @@
 
                 setLang(newLang) {
                     this.lang = newLang;
-                    localStorage.setItem('lang', newLang);
+                    safeStorage.set('lang', newLang);
                     let url = new URL(window.location.href);
                     url.searchParams.set('lang', newLang);
                     window.history.pushState({}, '', url);
                     // Dispatch event to let child components know language changed
                     this.$dispatch('lang-changed', newLang);
-                }
+                },
+
+                get darkMode() { return Alpine.store('theme').darkMode; }
             }));
         });
         

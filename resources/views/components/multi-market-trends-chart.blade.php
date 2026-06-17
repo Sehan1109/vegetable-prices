@@ -1,6 +1,6 @@
 <div x-data="MultiMarketChart({ vegetableId: '{{ $vegetableId ?? 'carrot' }}', days: {{ $days ?? 30 }} })" class="w-full relative select-none" id="multi-market-chart-component-root">
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 pb-4 border-b border-slate-100" id="multi-market-insights-header">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800" id="multi-market-insights-header">
         <div>
             <span class="text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase">
                 <span x-text="hoverStats ? 'Selected Date' : 'Overall Multi-Market Stats'"></span>
@@ -19,7 +19,7 @@
             <span class="text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase">
                 <span x-text="hoverStats ? 'Cheapest Market Value' : 'Max Price Spread'"></span>
             </span>
-            <div class="mt-1 flex items-baseline gap-1.5">
+            <div class="mt-1 flex items-baseline gap-1.5 text-slate-900 dark:text-white">
                 <template x-if="hoverStats && hoverStats.cheapest">
                     <div class="flex items-center gap-2">
                         <span class="text-lg font-bold font-mono text-emerald-600" x-text="'Rs. ' + hoverStats.cheapest.price"></span>
@@ -36,7 +36,7 @@
             <span class="text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase">
                 <span x-text="hoverStats ? 'Pricing Spread (Gap)' : 'Pricing Dynamics'"></span>
             </span>
-            <p class="text-sm font-semibold text-slate-700 mt-1 font-display">
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-1 font-display">
                 <template x-if="hoverStats">
                     <span class="font-mono text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded text-xs" x-text="'Gap: Rs. ' + hoverStats.spread + ' / kg'"></span>
                 </template>
@@ -48,7 +48,7 @@
     </div>
 
     <div class="h-[280px] w-full relative">
-        <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10 rounded-xl">
+        <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm z-10 rounded-xl">
             <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-indigo-500"></i>
         </div>
 
@@ -65,6 +65,7 @@
             loading: true,
             chart: null,
             maxSpread: 0,
+            darkMode: Alpine.store('theme').darkMode, // Access dark mode from global store
             hoverStats: null,
             
             markets: [
@@ -82,8 +83,14 @@
                 }
                 return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             },
-
+            
             async init() {
+                // Watch for theme changes globally
+                this.$watch('$store.theme.darkMode', (val) => {
+                    this.darkMode = val;
+                    this.updateChartColors();
+                });
+
                 const ctx = this.$refs.chartCanvas.getContext('2d');
                 const _this = this; // store reference to alpine instance
 
@@ -130,16 +137,16 @@
                                 labels: {
                                     usePointStyle: true,
                                     boxWidth: 8,
+                                    color: this.darkMode ? '#e2e8f0' : '#334155',
                                     font: { family: 'ui-sans-serif, system-ui', size: 12, weight: '600' },
-                                    color: '#334155',
                                     padding: 20
                                 }
                             },
                             tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                                titleColor: '#94a3b8',
-                                bodyColor: '#ffffff',
-                                borderColor: '#1e293b',
+                                backgroundColor: this.darkMode ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                                titleColor: this.darkMode ? '#94a3b8' : '#334155',
+                                bodyColor: this.darkMode ? '#ffffff' : '#1f2937',
+                                borderColor: this.darkMode ? '#1e293b' : '#d1d5db',
                                 borderWidth: 1,
                                 titleFont: { family: 'ui-monospace, SFMono-Regular', size: 11, weight: 'bold' },
                                 bodyFont: { family: 'ui-sans-serif, system-ui', size: 12, weight: 'bold' },
@@ -163,8 +170,8 @@
                             x: {
                                 grid: { display: false, drawBorder: false },
                                 ticks: { 
-                                    font: { size: 10 }, 
-                                    color: '#94a3b8', 
+                                    font: { size: 10, color: this.darkMode ? '#94a3b8' : '#6b7280' }, 
+                                    color: this.darkMode ? '#94a3b8' : '#6b7280', 
                                     maxTicksLimit: 7,
                                     callback: function(value, index, values) {
                                         // Ensure labels are nicely formatted as Dates
@@ -173,10 +180,10 @@
                                 }
                             },
                             y: {
-                                grid: { color: '#f1f5f9', drawBorder: false },
+                                grid: { color: this.darkMode ? '#1e293b' : '#e5e7eb', drawBorder: false },
                                 ticks: {
-                                    font: { family: 'ui-monospace' },
-                                    color: '#64748b',
+                                    font: { family: 'ui-monospace', color: this.darkMode ? '#64748b' : '#4b5563' },
+                                    color: this.darkMode ? '#64748b' : '#4b5563',
                                     callback: function(value) { return 'Rs. ' + value; }
                                 }
                             }
@@ -244,6 +251,15 @@
                 } finally {
                     this.loading = false;
                 }
+            },
+
+            updateChartColors() {
+                this.chart.options.plugins.tooltip.backgroundColor = this.darkMode ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+                this.chart.options.scales.x.ticks.color = this.darkMode ? '#94a3b8' : '#6b7280';
+                this.chart.options.scales.y.grid.color = this.darkMode ? '#1e293b' : '#e5e7eb';
+                this.chart.options.scales.y.ticks.color = this.darkMode ? '#64748b' : '#4b5563';
+                this.chart.options.plugins.legend.labels.color = this.darkMode ? '#e2e8f0' : '#334155';
+                this.chart.update();
             }
         }));
     });
