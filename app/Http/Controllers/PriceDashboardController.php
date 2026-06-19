@@ -46,7 +46,7 @@ class PriceDashboardController extends Controller
         
         // Latest ම තියෙන දිනය හොයාගන්නවා
         $latestRecord = PriceRecord::where('market_id', $marketId)
-            ->orderBy('date', '-1')
+            ->orderBy('date', 'desc')
             ->first();
 
         if ($latestRecord) {
