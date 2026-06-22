@@ -14,22 +14,11 @@ use Smalot\PdfParser\Parser;
 class ScrapeHartiPrices extends Command
 {
     protected $signature = 'harti:scrape {--force : Force re-scrape even if already done today} {--date= : Specific date to scrape (YYYY-MM-DD)}';
-    protected $description = 'Scrape Daily Food Commodity Prices from the CBSL Daily Price Report PDF';
+    protected $description = 'Scrape Daily Food Commodity Prices from the CBSL (primary) and HARTI (fallback)';
 
-    /**
-     * CBSL PDF URL pattern:
-     * https://www.cbsl.gov.lk/sites/default/files/cbslweb_documents/statistics/pricerpt/price_report_YYYYMMDD_e.pdf
-     */
     private const PDF_BASE_URL = 'https://www.cbsl.gov.lk/sites/default/files/cbslweb_documents/statistics/pricerpt/price_report_%s_e.pdf';
+    private const HARTI_INDEX_URL = 'https://www.harti.gov.lk/daily-price.php';
 
-    /**
-     * The market columns in the PDF table (left to right):
-     * Columns 1-2: Pettah (wholesale Yesterday / Today)
-     * Columns 3-4: Dambulla (Yesterday / Today)
-     * Columns 5-6: Narahenpita (Yesterday / Today)  [retail]
-     * Columns 7-8: Peliyagoda (Yesterday / Today)   [wholesale fish market]
-     * Columns 9-10: Negombo (Yesterday / Today)
-     */
     private const MARKET_COLUMNS = [
         0 => ['id' => 'pettah',       'yesterday' => 0, 'today' => 1],
         1 => ['id' => 'dambulla',     'yesterday' => 2, 'today' => 3],
@@ -37,6 +26,21 @@ class ScrapeHartiPrices extends Command
         3 => ['id' => 'peliyagoda',   'yesterday' => 6, 'today' => 7],
         4 => ['id' => 'negombo',      'yesterday' => 8, 'today' => 9],
     ];
+
+    private const HARTI_MARKET_COLUMNS = [
+        0 => 'peliyagoda',
+        1 => 'kandy',
+        2 => 'dambulla',
+        3 => 'meegoda',
+        4 => 'norochchole',
+        5 => 'thambuththegama',
+        6 => 'keppetipola',
+        7 => 'nuwara-eliya',
+        8 => 'bandarawela',
+        9 => 'veyangoda',
+    ];
+
+    private ?string $hartiIndexHtml = null;
 
     public function handle(): int
     {
@@ -46,7 +50,6 @@ class ScrapeHartiPrices extends Command
 
         $today = $targetDate->toDateString();
 
-        // ── Guard: skip if already ran today ───────────────────────────
         if (!$this->option('force') && !$this->option('date')) {
             if (Cache::get('last_auto_update_date') === $today) {
                 $this->info("Already scraped today ({$today}). Use --force to re-run.");
@@ -55,251 +58,212 @@ class ScrapeHartiPrices extends Command
         }
 
         $this->info('═══════════════════════════════════════════════════');
-        $this->info('  CBSL Daily Price Report — PDF Extraction Pipeline');
+        $this->info('  Daily Price Report — PDF Extraction Pipeline');
         $this->info('═══════════════════════════════════════════════════');
 
-        try {
-            // Step 1 ── Find the PDF for today (try today + up to 3 previous working days)
-            $this->info('[1/4] Finding today\'s PDF report...');
-            [$pdfUrl, $pdfDate] = $this->findPdfUrl($targetDate);
+        for ($i = 0; $i <= 7; $i++) {
+            $currentDate = $targetDate->copy()->subDays($i);
+            $this->info("\n[CHECKING DATE: {$currentDate->toDateString()}]");
 
-            if (!$pdfUrl) {
-                $msg = 'Could not locate today\'s price report PDF on CBSL. It may not be published yet.';
-                $this->warn($msg);
-                $this->addLog($msg, 'warning');
-                $this->markPipelineError($msg);
-                return Command::FAILURE;
-            }
+            // --- PRIMARY PIPELINE (HARTI) ---
+            $this->info('[PRIMARY] Attempting HARTI scrape...');
+            [$hartiUrl, $hartiDate] = $this->findHartiPdfUrl($currentDate);
 
-            $this->line("   → PDF URL: {$pdfUrl}");
-            $this->line("   → Report date: {$pdfDate}");
-            $this->addLog("Found PDF: {$pdfUrl}", 'info');
-            Cache::put('scraped_pdf_url', $pdfUrl);
-            Cache::put('scraped_pdf_date', $pdfDate);
+            if ($hartiUrl) {
+                $this->line("   → PDF URL: {$hartiUrl}");
+                $this->line("   → Report date: {$hartiDate}");
 
-            // Step 2 ── Download the PDF
-            $this->info('[2/4] Downloading PDF...');
-            $pdfContent = $this->downloadPdf($pdfUrl);
+                $this->info('[HARTI 2/4] Downloading PDF...');
+                $pdfContent = $this->downloadPdf($hartiUrl);
 
-            if (!$pdfContent) {
-                $msg = 'Failed to download PDF from CBSL.';
-                $this->error($msg);
-                $this->addLog($msg, 'error');
-                $this->markPipelineError($msg);
-                return Command::FAILURE;
-            }
+                if ($pdfContent) {
+                    $this->info('[HARTI 3/4] Parsing price data from PDF table...');
+                    try {
+                        $rows = $this->parseHartiPdf($pdfContent, $hartiDate);
 
-            $this->line('   → Downloaded ' . number_format(strlen($pdfContent)) . ' bytes.');
+                        if (!empty($rows)) {
+                            $this->line('   → Parsed ' . count($rows) . ' price rows.');
 
-            // Step 3 ── Parse price rows from the PDF
-            $this->info('[3/4] Parsing price data from PDF table...');
-            $rows = $this->parsePdf($pdfContent, $pdfDate);
+                            $this->info('[HARTI 4/4] Saving to database...');
+                            $saved = $this->saveToDatabase($rows);
+                            $this->line("   → {$saved} records saved/updated.");
 
-            if (empty($rows)) {
-                $this->warn('Parsed 0 rows — PDF table structure may have changed.');
-                $this->addLog('Warning: 0 rows parsed — PDF format may have changed.', 'warning');
+                            Cache::put('last_auto_update_date', $hartiDate);
+                            Cache::put('pipeline_info', [
+                                'pipelineHealth'     => 'healthy',
+                                'lastError'          => null,
+                                'lastErrorTime'      => null,
+                                'lastAutoUpdateDate' => $hartiDate,
+                                'source'             => 'harti'
+                            ]);
+                            $this->addLog("[HARTI] Pipeline complete: {$saved} records for {$hartiDate}.", 'success');
+                            $this->info("✔ Done (HARTI) — {$saved} price records saved for {$hartiDate}.");
+                            return Command::SUCCESS;
+                        } else {
+                            $this->warn('[HARTI] Parsed 0 rows — PDF table structure may have changed. Proceeding to fallback.');
+                        }
+                    } catch (\Throwable $e) {
+                        $this->warn("HARTI Pipeline error: " . $e->getMessage() . ". Proceeding to fallback.");
+                        Log::error('HARTI Pipeline Exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+                    }
+                } else {
+                    $this->warn('[HARTI] Failed to download PDF. Proceeding to fallback.');
+                }
             } else {
-                $this->line('   → Parsed ' . count($rows) . ' price rows.');
+                $this->warn('[HARTI] PDF not found for ' . $currentDate->toDateString() . '. Proceeding to fallback.');
             }
 
-            // Step 4 ── Save to database
-            $this->info('[4/4] Saving to database...');
-            $saved = $this->saveToDatabase($rows);
-            $this->line("   → {$saved} records saved/updated.");
-
-            // ── Update cache ─────────────────────────────────────────────
-            Cache::put('last_auto_update_date', $pdfDate);
-            Cache::put('pipeline_info', [
-                'pipelineHealth'     => 'healthy',
-                'lastError'          => null,
-                'lastErrorTime'      => null,
-                'lastAutoUpdateDate' => $pdfDate,
-            ]);
-            $this->addLog("Pipeline complete: {$saved} records for {$pdfDate}.", 'success');
-            $this->info("✔ Done — {$saved} price records saved for {$pdfDate}.");
-            Log::info("CBSL Pipeline: {$saved} records for {$pdfDate}.");
-
-            return Command::SUCCESS;
-
-        } catch (\Throwable $e) {
-            $msg = $e->getMessage();
-            $this->error("Pipeline error: {$msg}");
-            Log::error("CBSL Pipeline Exception", ['error' => $msg, 'trace' => $e->getTraceAsString()]);
-            $this->addLog("Exception: {$msg}", 'error');
-            $this->markPipelineError($msg);
-            return Command::FAILURE;
-        }
-    }
-
-    // ══════════════════════════════════════════════════════════════════
-    //  Step 1 — Find the PDF URL
-    //  Try today, then fall back up to 3 prior working days
-    // ══════════════════════════════════════════════════════════════════
-
-    private function findPdfUrl(Carbon $date): array
-    {
-        // Try today and the previous 3 days (in case PDF isn't published yet today)
-        for ($i = 0; $i <= 3; $i++) {
-            $d = $date->copy()->subDays($i);
-
-            // Skip weekends (CBSL doesn't publish on Sat/Sun)
-            if ($d->isWeekend()) {
-                $this->line("   → Skipping weekend: {$d->toDateString()}");
+            // --- FALLBACK PIPELINE (CBSL) ---
+            if ($currentDate->isWeekend()) {
+                $this->warn('[CBSL] Skipping CBSL scrape (Weekend).');
                 continue;
             }
 
-            $dateStr = $d->format('Ymd');   // e.g. 20260619
-            $url = sprintf(self::PDF_BASE_URL, $dateStr);
-            $this->line("   → Trying: {$url}");
+            $this->info('[FALLBACK] Attempting CBSL scrape...');
+            [$cbslUrl, $cbslDate] = $this->findCbslPdfUrl($currentDate);
 
-            try {
-                $response = Http::timeout(20)
-                    ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; LankaPriceBot/1.0)'])
-                    ->head($url);
+            if ($cbslUrl) {
+                $this->line("   → PDF URL: {$cbslUrl}");
+                $this->line("   → Report date: {$cbslDate}");
 
-                if ($response->successful() || $response->status() === 302) {
-                    return [$url, $d->toDateString()];
+                $this->info('[CBSL 2/4] Downloading PDF...');
+                $pdfContent = $this->downloadPdf($cbslUrl);
+
+                if ($pdfContent) {
+                    $this->info('[CBSL 3/4] Parsing price data from PDF table...');
+                    $rows = $this->parseCbslPdf($pdfContent, $cbslDate);
+
+                    if (!empty($rows)) {
+                        $this->info('[CBSL 4/4] Saving to database...');
+                        $saved = $this->saveToDatabase($rows);
+                        $this->line("   → {$saved} records saved/updated.");
+
+                        Cache::put('last_auto_update_date', $cbslDate);
+                        Cache::put('pipeline_info', [
+                            'pipelineHealth'     => 'healthy',
+                            'lastError'          => null,
+                            'lastErrorTime'      => null,
+                            'lastAutoUpdateDate' => $cbslDate,
+                            'source'             => 'cbsl'
+                        ]);
+                        $this->addLog("[CBSL] Pipeline complete: {$saved} records for {$cbslDate}.", 'success');
+                        $this->info("✔ Done (CBSL fallback) — {$saved} price records saved for {$cbslDate}.");
+                        return Command::SUCCESS;
+                    } else {
+                        $this->warn('[CBSL] Parsed 0 rows from CBSL PDF — structure may have changed.');
+                    }
+                } else {
+                    $this->warn('[CBSL] Failed to download PDF from CBSL.');
                 }
-
-                // Also try a GET with small range to confirm file exists
-                $response = Http::timeout(20)
-                    ->withHeaders([
-                        'User-Agent' => 'Mozilla/5.0 (compatible; LankaPriceBot/1.0)',
-                        'Range'      => 'bytes=0-1023',
-                    ])
-                    ->get($url);
-
-                if ($response->successful() || $response->status() === 206) {
-                    return [$url, $d->toDateString()];
-                }
-            } catch (\Throwable $e) {
-                $this->line("   → Error checking {$url}: " . $e->getMessage());
+            } else {
+                $this->warn('[CBSL] PDF not found for ' . $currentDate->toDateString() . '.');
             }
         }
+
+        $msg = 'Could not locate a price report PDF on either HARTI or CBSL for the last 7 days.';
+        $this->error($msg);
+        $this->addLog($msg, 'error');
+        $this->markPipelineError($msg);
+        return Command::FAILURE;
+    }
+
+    private function findCbslPdfUrl(Carbon $date): array
+    {
+        $dateStr = $date->format('Ymd');
+        $url = sprintf(self::PDF_BASE_URL, $dateStr);
+        $this->line("   → Trying CBSL: {$url}");
+
+        try {
+            $response = Http::timeout(20)->withHeaders(['User-Agent' => 'LankaPriceBot/1.0'])->head($url);
+            if ($response->successful() || $response->status() === 302) return [$url, $date->toDateString()];
+            $response = Http::timeout(20)->withHeaders(['User-Agent' => 'LankaPriceBot/1.0', 'Range' => 'bytes=0-1023'])->get($url);
+            if ($response->successful() || $response->status() === 206) return [$url, $date->toDateString()];
+        } catch (\Throwable $e) {}
 
         return [null, null];
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    //  Step 2 — Download the PDF bytes
-    // ══════════════════════════════════════════════════════════════════
+    private function findHartiPdfUrl(Carbon $date): array
+    {
+        $this->line("   → Checking HARTI index page...");
+        try {
+            if ($this->hartiIndexHtml === null) {
+                $response = Http::timeout(20)->withHeaders(['User-Agent' => 'Mozilla/5.0'])->get(self::HARTI_INDEX_URL);
+                if (!$response->successful()) return [null, null];
+                $this->hartiIndexHtml = $response->body();
+            }
+
+            $html = $this->hartiIndexHtml;
+            preg_match_all('/href=["\']([^"\']+\.pdf)["\']/i', $html, $matches);
+            $links = $matches[1] ?? [];
+            
+            // HARTI uses "2026.06.19" in the filename
+            $targetDateStr = $date->format('Y.m.d');
+            $targetDateDash = $date->toDateString(); // "2026-06-19" just in case
+            
+            foreach ($links as $link) {
+                if (str_contains($link, $targetDateStr) || str_contains($link, $targetDateDash)) {
+                    $fullUrl = str_starts_with($link, 'http') ? $link : "https://www.harti.gov.lk/" . ltrim($link, '/');
+                    return [$fullUrl, $date->toDateString()];
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->warn("HARTI index check failed: " . $e->getMessage());
+        }
+        return [null, null];
+    }
 
     private function downloadPdf(string $url): ?string
     {
         try {
-            $response = Http::timeout(60)
-                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; LankaPriceBot/1.0)'])
-                ->get($url);
-
-            if (!$response->successful()) {
-                $this->warn("HTTP {$response->status()} downloading PDF.");
-                return null;
-            }
-
+            $response = Http::timeout(60)->withHeaders(['User-Agent' => 'Mozilla/5.0'])->get($url);
+            if (!$response->successful()) return null;
             $body = $response->body();
-            if (strlen($body) < 5000) {
-                $this->warn("PDF too small (" . strlen($body) . " bytes), likely invalid.");
-                return null;
-            }
-
+            if (strlen($body) < 5000) return null;
             return $body;
         } catch (\Throwable $e) {
-            $this->warn("Exception downloading PDF: " . $e->getMessage());
             return null;
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    //  Step 3 — Parse PDF text into price rows
-    //
-    //  The CBSL PDF table has this column structure:
-    //
-    //    Item | Unit | Pettah(Yest) | Pettah(Today) |
-    //         Dambulla(Yest) | Dambulla(Today) |
-    //         Narahenpita(Yest) | Narahenpita(Today) |
-    //         Peliyagoda(Yest) | Peliyagoda(Today) |
-    //         Negombo(Yest) | Negombo(Today)
-    //
-    //  pdfparser extracts text row-by-row, tab-separated.
-    // ══════════════════════════════════════════════════════════════════
-
-    private function parsePdf(string $pdfContent, string $date): array
+    private function parseCbslPdf(string $pdfContent, string $date): array
     {
         $parser = new Parser();
         $pdf    = $parser->parseContent($pdfContent);
         $text   = $pdf->getText();
+        $rows   = [];
 
-        $rows = [];
-
-        // Find the table section — starts at "Wholesale and Retail Prices"
         $tableStart = strpos($text, 'Wholesale and Retail');
-        if ($tableStart === false) {
-            $this->warn('   → Could not find table section in PDF.');
-            return [];
-        }
-
+        if ($tableStart === false) return [];
         $tableText = substr($text, $tableStart);
-
-        // Split into lines
         $lines = explode("\n", $tableText);
-
-        // Skip the header rows (first 2 lines: title + "Yesterday Today Yesterday Today...")
         $dataLines = array_slice($lines, 2);
 
         foreach ($dataLines as $line) {
             $line = trim($line);
             if (empty($line)) continue;
+            if (str_starts_with($line, 'n.a.') || preg_match('/^\d{1,2}\s+\w+,\s+\d{4}$/', $line) || preg_match('/^[A-Z\s]+$/', $line) || str_contains($line, 'Marandagahamula')) break;
 
-            // Stop at footer notes
-            if (str_starts_with($line, 'n.a. - Price is not reported')
-                || str_starts_with($line, 'Price increased')
-                || str_starts_with($line, 'Price decreased')
-                || preg_match('/^\d{1,2}\s+\w+,\s+\d{4}$/', $line)   // date line like "19 June, 2026"
-                || preg_match('/^[A-Z\s]+$/', $line)                   // section headers like "V E G E T A B L E S"
-                || str_contains($line, 'Marandagahamula')
-            ) {
-                break;
-            }
-
-            // Each data line looks like:
-            // "Beans\tRs./kg 450.00           350.00       450.00          315.00       ..."
-            // OR
-            // "Snake gourd Rs./kg 250.00           250.00       ..."
-            // The item name may or may not be tab-separated from unit
-
-            // Normalize tabs to spaces for consistent splitting
             $line = preg_replace('/\t+/', "\t", $line);
-
-            // Extract item name (everything before Rs./ or Rs. )
-            if (!preg_match('/^(.+?)\s+Rs\.\/(kg|Nut|Ltr|Each|litre)\s+(.+)$/i', $line, $m)) {
-                continue;
-            }
+            if (!preg_match('/^(.+?)\s+Rs\.\/(kg|Nut|Ltr|Each|litre)\s+(.+)$/i', $line, $m)) continue;
 
             $rawName  = trim($m[1]);
-            // $unit  = $m[2]; // not currently used
             $priceStr = trim($m[3]);
-
-            // Normalize vegetable name
             $vegId = VegetableNormalizer::normalize($rawName);
-            if (!$vegId) {
-                // Log unmatched names in debug mode
-                $this->line("   [skip] Unmatched: '{$rawName}'");
-                continue;
+            if (!$vegId) continue;
+
+            $parts = preg_split('/\s+/', trim($priceStr));
+            $prices = [];
+            foreach ($parts as $part) {
+                if (preg_match('/^n\.?a\.?$/i', $part)) { $prices[] = null; continue; }
+                $num = str_replace(',', '', $part);
+                $prices[] = is_numeric($num) ? (float) $num : null;
             }
 
-            // Parse the 10 price values (5 markets × 2 columns: Yesterday, Today)
-            $prices = $this->parsePriceRow($priceStr);
-
-            // Map each market column to a database row
             foreach (self::MARKET_COLUMNS as $marketDef) {
                 $marketId  = $marketDef['id'];
-                $yestIdx   = $marketDef['yesterday'];
-                $todayIdx  = $marketDef['today'];
-
-                $priceYest  = $prices[$yestIdx] ?? null;
-                $priceToday = $prices[$todayIdx] ?? null;
-
-                // Only save if we have at least the today price
+                $priceYest  = $prices[$marketDef['yesterday']] ?? null;
+                $priceToday = $prices[$marketDef['today']] ?? null;
                 if ($priceToday === null && $priceYest === null) continue;
 
                 $change = null;
@@ -308,9 +272,7 @@ class ScrapeHartiPrices extends Command
                     $change = round((($priceToday - $priceYest) / $priceYest) * 100, 2);
                     $trend  = $this->trendFromChange($change);
                 }
-
-                $key = "{$date}|{$marketId}|{$vegId}";
-                $rows[$key] = [
+                $rows["{$date}|{$marketId}|{$vegId}"] = [
                     'date'            => $date,
                     'market_id'       => $marketId,
                     'vegetable_id'    => $vegId,
@@ -321,43 +283,139 @@ class ScrapeHartiPrices extends Command
                 ];
             }
         }
-
         return array_values($rows);
     }
 
-    /**
-     * Parse a string of whitespace-separated price values like:
-     *   "450.00           350.00       450.00          315.00       500.00  ..."
-     *   Values may be "n.a." (not available).
-     * Returns array of floats|nulls indexed 0..9.
-     */
-    private function parsePriceRow(string $priceStr): array
+    private function parseHartiPdf(string $pdfContent, string $date): array
     {
-        // Split on whitespace, collapsing multiple spaces
-        $parts = preg_split('/\s+/', trim($priceStr));
+        $parser = new Parser();
+        $pdf    = $parser->parseContent($pdfContent);
+        $text   = $pdf->getText();
 
-        $values = [];
-        foreach ($parts as $part) {
-            $part = trim($part);
-            if (empty($part)) continue;
+        $rows            = [];
+        $lines           = explode("\n", $text);
+        $inDataSection   = false;
+        $skippedHeaders  = ['Low country Vegetable', 'Low Country Vegetable', 'Up Country Vegetable', 'Variety'];
+        $stopPatterns    = ['/^\s{30,}$/', '/^\d{4}\.\d{2}\.\d{2}/'];
 
-            // Handle "n.a." and variants
-            if (preg_match('/^n\.?a\.?$/i', $part)) {
-                $values[] = null;
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+
+            if (!$inDataSection) {
+                if (str_contains($trimmed, 'Up Country') || str_contains($trimmed, 'Variety')) $inDataSection = true;
                 continue;
             }
 
-            // Handle numbers with commas like "1,000.00"
-            $num = str_replace(',', '', $part);
-            if (is_numeric($num)) {
-                $values[] = (float) $num;
+            foreach ($stopPatterns as $pattern) {
+                if (preg_match($pattern, $line)) goto finishParsing;
+            }
+
+            if (str_starts_with($trimmed, 'Banana') || str_starts_with($trimmed, 'Other Fruits') || str_starts_with($trimmed, 'Pineapple') || str_starts_with($trimmed, 'Hector') || str_starts_with($trimmed, 'Data Management')) break;
+
+            if (empty($trimmed)) continue;
+            if (in_array($trimmed, $skippedHeaders, true) || preg_match('/^(Up Country|Low [Cc]ountry)\s+Vegetable/i', $trimmed)) continue;
+
+            $normalised = str_replace("\t", " ", $trimmed);
+            $name       = null;
+            $priceStr   = null;
+
+            if (preg_match('/\d{2,3}\s*-\s*\d{2,3}/', $normalised, $m, PREG_OFFSET_CAPTURE)) {
+                $rangeStart = $m[0][1];
+                $before     = substr($normalised, 0, $rangeStart);
+                $name       = preg_replace('/(\s+-\s*)+$/', '', $before);
+                $name       = trim($name);
+                $priceStr   = trim(substr($normalised, strlen($name)));
+            } elseif (preg_match('/^(.+?)\s+([-\s]+)$/', $normalised, $allNullMatch)) {
+                $name     = trim($allNullMatch[1]);
+                $priceStr = trim($allNullMatch[2]);
             } else {
-                // Unknown token — treat as null
-                $values[] = null;
+                continue; 
+            }
+
+            if (empty($name) || empty($priceStr)) continue;
+
+            $vegId = VegetableNormalizer::normalize($name);
+            if (!$vegId) continue;
+
+            $str    = str_replace("\t", " ", trim($priceStr));
+            $tokens = [];
+            $pos    = 0;
+            $len    = strlen($str);
+
+            while ($pos < $len && count($tokens) < 10) {
+                while ($pos < $len && $str[$pos] === ' ') $pos++;
+                if ($pos >= $len) break;
+
+                if (ctype_digit($str[$pos])) {
+                    $numStart = $pos;
+                    while ($pos < $len && ctype_digit($str[$pos])) $pos++;
+                    $firstNum = substr($str, $numStart, $pos - $numStart);
+                    $firstLen = strlen($firstNum);
+
+                    if ($pos < $len && $str[$pos] === '-') {
+                        $pos++;
+                        $savedPos   = $pos;
+                        $validRange = false;
+
+                        foreach ([$firstLen, $firstLen + 1] as $targetLen) {
+                            $pos        = $savedPos;
+                            $digitCount = 0;
+
+                            while ($pos < $len && ctype_digit($str[$pos]) && $digitCount < $targetLen) {
+                                $pos++;
+                                $digitCount++;
+                            }
+
+                            if ($digitCount >= 2) {
+                                $secondNum = substr($str, $savedPos, $digitCount);
+                                $lo = (int) $firstNum;
+                                $hi = (int) $secondNum;
+
+                                if ($hi >= $lo) {
+                                    $tokens[]   = round(($lo + $hi) / 2, 2);
+                                    $validRange = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!$validRange) $pos = $savedPos;
+                    }
+                } elseif ($str[$pos] === '-') {
+                    $tokens[] = null;
+                    $pos++;
+                } else {
+                    $pos++;
+                }
+            }
+
+            $yesterday = Carbon::parse($date, 'Asia/Colombo')->subDay()->toDateString();
+
+            foreach (self::HARTI_MARKET_COLUMNS as $colIdx => $marketId) {
+                $price = $tokens[$colIdx] ?? null;
+                if ($price === null) continue;
+
+                $priceYest = PriceRecord::where(['date' => $yesterday, 'market_id' => $marketId, 'vegetable_id' => $vegId])->value('price');
+                $change = null;
+                $trend  = 'none';
+                if ($priceYest !== null && $priceYest > 0) {
+                    $change = round((($price - $priceYest) / $priceYest) * 100, 2);
+                    $trend  = $this->trendFromChange($change);
+                }
+
+                $rows["{$date}|{$marketId}|{$vegId}"] = [
+                    'date'            => $date,
+                    'market_id'       => $marketId,
+                    'vegetable_id'    => $vegId,
+                    'price'           => $price,
+                    'price_yesterday' => $priceYest,
+                    'change_percent'  => $change,
+                    'trend'           => $trend,
+                ];
             }
         }
 
-        return $values;
+        finishParsing:
+        return array_values($rows);
     }
 
     private function trendFromChange(?float $change): string
@@ -368,44 +426,23 @@ class ScrapeHartiPrices extends Command
         return 'flat';
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    //  Step 4 — Upsert to database
-    // ══════════════════════════════════════════════════════════════════
-
     private function saveToDatabase(array $rows): int
     {
         $count = 0;
         foreach ($rows as $row) {
             PriceRecord::updateOrCreate(
-                [
-                    'date'         => $row['date'],
-                    'market_id'    => $row['market_id'],
-                    'vegetable_id' => $row['vegetable_id'],
-                ],
-                [
-                    'price'           => $row['price'],
-                    'price_yesterday' => $row['price_yesterday'],
-                    'change_percent'  => $row['change_percent'],
-                    'trend'           => $row['trend'],
-                ]
+                ['date' => $row['date'], 'market_id' => $row['market_id'], 'vegetable_id' => $row['vegetable_id']],
+                ['price' => $row['price'], 'price_yesterday' => $row['price_yesterday'], 'change_percent' => $row['change_percent'], 'trend' => $row['trend']]
             );
             $count++;
         }
         return $count;
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    //  Cache helpers
-    // ══════════════════════════════════════════════════════════════════
-
     private function addLog(string $message, string $type = 'info'): void
     {
         $logs = Cache::get('pipeline_logs', []);
-        array_unshift($logs, [
-            'timestamp' => now()->toIso8601String(),
-            'message'   => $message,
-            'type'      => $type,
-        ]);
+        array_unshift($logs, ['timestamp' => now()->toIso8601String(), 'message' => $message, 'type' => $type]);
         Cache::put('pipeline_logs', array_slice($logs, 0, 100));
     }
 

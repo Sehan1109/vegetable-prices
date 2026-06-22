@@ -1,9 +1,9 @@
 <!-- Trends Chart Component in Laravel Blade -->
-<div x-data="TrendsChart({ vegetableId: '{{ $vegetableId ?? 'carrot' }}', marketId: '{{ $marketId ?? 'pettah' }}', days: {{ $days ?? 30 }} })" class="w-full relative">
+<div x-data="TrendsChart({ vegetableId: '{{ $vegetableId ?? 'carrot' }}', marketId: '{{ $marketId ?? 'peliyagoda' }}', days: {{ $days ?? 30 }} })" class="w-full relative">
     
     <div class="h-[280px] w-full relative">
         <!-- Loading State -->
-        <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm z-10 rounded-xl">
+        <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10 rounded-xl">
             <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-500"></i>
         </div>
 

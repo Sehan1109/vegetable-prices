@@ -1,6 +1,6 @@
 <div x-data="MultiMarketChart({ vegetableId: '{{ $vegetableId ?? 'carrot' }}', days: {{ $days ?? 30 }} })" class="w-full relative select-none" id="multi-market-chart-component-root">
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800" id="multi-market-insights-header">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 pb-4 border-b border-slate-100" id="multi-market-insights-header">
         <div>
             <span class="text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase">
                 <span x-text="hoverStats ? 'Selected Date' : 'Overall Multi-Market Stats'"></span>
@@ -19,7 +19,7 @@
             <span class="text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase">
                 <span x-text="hoverStats ? 'Cheapest Market Value' : 'Max Price Spread'"></span>
             </span>
-            <div class="mt-1 flex items-baseline gap-1.5 text-slate-900 dark:text-white">
+            <div class="mt-1 flex items-baseline gap-1.5 text-slate-900">
                 <template x-if="hoverStats && hoverStats.cheapest">
                     <div class="flex items-center gap-2">
                         <span class="text-lg font-bold font-mono text-emerald-600" x-text="'Rs. ' + hoverStats.cheapest.price"></span>
@@ -36,7 +36,7 @@
             <span class="text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase">
                 <span x-text="hoverStats ? 'Pricing Spread (Gap)' : 'Pricing Dynamics'"></span>
             </span>
-            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-1 font-display">
+            <p class="text-sm font-semibold text-slate-700 mt-1 font-display">
                 <template x-if="hoverStats">
                     <span class="font-mono text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded text-xs" x-text="'Gap: Rs. ' + hoverStats.spread + ' / kg'"></span>
                 </template>
@@ -48,7 +48,7 @@
     </div>
 
     <div class="h-[280px] w-full relative">
-        <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm z-10 rounded-xl">
+        <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10 rounded-xl">
             <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-indigo-500"></i>
         </div>
 
@@ -70,7 +70,7 @@
             
             markets: [
                 { id: 'dambulla', name: 'Dambulla', color: '#10B981' }, // Emerald
-                { id: 'pettah', name: 'Pettah', color: '#06B6D4' },     // Cyan
+                { id: 'peliyagoda', name: 'Peliyagoda', color: '#06B6D4' },     // Cyan
                 { id: 'narahenpita', name: 'Narahenpita', color: '#3B82F6' }, // Blue
                 { id: 'keppetipola', name: 'Keppetipola', color: '#8B5CF6' }  // Purple
             ],

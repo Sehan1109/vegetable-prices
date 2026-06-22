@@ -23,15 +23,15 @@
         <!-- Language Switcher & Quick Controls -->
         <div class="flex items-center gap-2">
             <!-- Theme Toggle -->
-            <button @click="$store.theme.toggle()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
+            <button @click="$store.theme.toggle()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
                 <i :data-lucide="$store.theme.darkMode ? 'sun' : 'moon'" class="w-4 h-4"></i>
             </button>
 
             <!-- Language Toggle Buttons -->
-            <div class="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50 mr-1 text-[10px] font-mono font-bold">
-                <button @click="lang = 'en'" :class="lang === 'en' ? 'bg-white text-slate-900 shadow-2xs dark:bg-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200'" class="px-1.5 py-0.5 rounded transition">EN</button>
-                <button @click="lang = 'si'" :class="lang === 'si' ? 'bg-white text-slate-900 shadow-2xs dark:bg-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200'" class="px-1.5 py-0.5 rounded transition">සිං</button>
-                <button @click="lang = 'ta'" :class="lang === 'ta' ? 'bg-white text-slate-900 shadow-2xs dark:bg-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200'" class="px-1.5 py-0.5 rounded transition">தமிழ்</button>
+            <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200/50 mr-1 text-[10px] font-mono font-bold">
+                <button @click="lang = 'en'" :class="lang === 'en' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-400 hover:text-slate-600'" class="px-1.5 py-0.5 rounded transition">EN</button>
+                <button @click="lang = 'si'" :class="lang === 'si' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-400 hover:text-slate-600'" class="px-1.5 py-0.5 rounded transition">සිං</button>
+                <button @click="lang = 'ta'" :class="lang === 'ta' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-400 hover:text-slate-600'" class="px-1.5 py-0.5 rounded transition">தமிழ்</button>
             </div>
 
             <button type="button" @click="addAll()"
@@ -61,7 +61,7 @@
             </div>
 
             <!-- Value Pack Feature Box -->
-            <div class="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 flex flex-col justify-between">
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between">
                 <div class="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 tracking-wider">
                     <span x-text="translations[lang].basketValuePack"></span>
                     <span class="text-emerald-600 font-bold">
@@ -74,7 +74,7 @@
                         Rs. <span x-text="allProduceTotal.toLocaleString()"></span>
                     </span>
                 </div>
-                <p class="text-[10px] text-slate-400 dark:text-slate-400 mt-2.5 font-sans leading-relaxed" x-text="translations[lang].basketUnifiedCostDesc"></p>
+                <p class="text-[10px] text-slate-400 mt-2.5 font-sans leading-relaxed" x-text="translations[lang].basketUnifiedCostDesc"></p>
                 <button type="button" @click="addAll()"
                         class="mt-4 w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs">
                     <span x-text="translations[lang].basketAddEverythingBtn"></span>
@@ -90,7 +90,7 @@
             <!-- Items Rows Container -->
             <div class="space-y-3 max-h-[340px] overflow-y-auto pr-1">
                 <template x-for="item in itemsWithPrices" :key="item.veg.id">
-                    <div class="flex items-center justify-between gap-4 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 rounded-xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                    <div class="flex items-center justify-between gap-4 p-3 bg-slate-50 hover:bg-slate-100/80 rounded-xl transition-all border border-transparent hover:border-slate-100">
                         
                         <!-- Commodity Metadata -->
                         <div class="flex items-center gap-3">
@@ -108,7 +108,7 @@
                         <!-- Quantity Selector and Action Cost Panel -->
                         <div class="flex items-center gap-4">
                             <!-- Dial Interval Selector -->
-                            <div class="flex items-center border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg p-1 shadow-2xs h-8">
+                            <div class="flex items-center border border-slate-200 bg-white rounded-lg p-1 shadow-2xs h-8">
                                 <button type="button" @click="decreaseQty(item.veg.id)"
                                         class="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:bg-slate-50 font-bold text-sm transition">
                                     -
@@ -123,7 +123,7 @@
 
                             <!-- Cost Calculation Column -->
                             <div class="text-right w-24">
-                                <p class="text-xs font-bold text-slate-800 dark:text-slate-100 font-mono">
+                                <p class="text-xs font-bold text-slate-800 font-mono">
                                     Rs. <span x-text="Math.round(item.total).toLocaleString()"></span>
                                 </p>
                                 <button type="button" @click="removeItem(item.veg.id)"
@@ -138,17 +138,17 @@
             </div>
 
             <!-- 4. ESTIMATED BALANCE TOTAL CARD -->
-            <div class="bg-emerald-600 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden dark:bg-slate-900 dark:text-white">
-                <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-emerald-500/20 blur-xl pointer-events-none dark:bg-emerald-500/10"></div>
-                <div class="absolute left-1/3 top-0 w-24 h-24 rounded-full bg-emerald-700/60 blur-lg pointer-events-none dark:bg-slate-800/60"></div>
+            <div class="bg-emerald-600 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-emerald-500/20 blur-xl pointer-events-none"></div>
+                <div class="absolute left-1/3 top-0 w-24 h-24 rounded-full bg-emerald-700/60 blur-lg pointer-events-none"></div>
 
                 <div class="relative flex justify-between items-baseline mb-4">
-                    <span class="text-xs font-mono tracking-wider uppercase text-emerald-100 dark:text-slate-400" x-text="translations[lang].basketEstimatedTotal"></span>
+                    <span class="text-xs font-mono tracking-wider uppercase text-emerald-100" x-text="translations[lang].basketEstimatedTotal"></span>
                     <div class="text-right">
-                        <span class="text-3xl font-black tracking-tight text-white dark:text-emerald-400 font-mono">
+                        <span class="text-3xl font-black tracking-tight text-white font-mono">
                             Rs. <span x-text="Math.round(basketTotal).toLocaleString()"></span>
                         </span>
-                        <p class="text-[10px] text-emerald-100 dark:text-slate-400 mt-1 font-mono">
+                        <p class="text-[10px] text-emerald-100 mt-1 font-mono">
                             <span x-text="lang === 'si' ? 'මුළු බර: ' : (lang === 'ta' ? 'மொத்த எடை: ' : 'For ')"></span>
                             <span class="font-bold text-white" x-text="totalWeight.toFixed(1)"></span>kg 
                             <span x-text="lang === 'si' ? ' එළවළු සඳහා' : (lang === 'ta' ? ' விளைபொருட்கள்' : ' of fresh produce')"></span>
@@ -157,7 +157,7 @@
                 </div>
 
                 <!-- Footer Benchmark Disclaimer Checkbox -->
-                <div class="border-t border-emerald-700 pt-3 flex items-center gap-2.5 text-xs text-emerald-100 dark:border-slate-800 dark:text-slate-400">
+                <div class="border-t border-emerald-700 pt-3 flex items-center gap-2.5 text-xs text-emerald-100">
                     <i data-lucide="scale" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
                     <span class="font-sans text-[11px] text-slate-300">
                         <template x-if="lang === 'si'">
@@ -180,8 +180,8 @@
                 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <template x-for="comparison in marketComparisons" :key="comparison.marketId">
-                        <div class="flex flex-col justify-between p-3 rounded-xl border text-xs transition-all bg-white dark:bg-slate-800 dark:border-slate-700"
-                             :class="comparison.marketId === currentMarket.id ? 'border-emerald-500 bg-emerald-50/10 ring-1 ring-emerald-500/20 dark:bg-emerald-900/20' : 'border-slate-100 hover:border-slate-200 shadow-3xs dark:hover:border-slate-600'">
+                        <div class="flex flex-col justify-between p-3 rounded-xl border text-xs transition-all bg-white"
+                             :class="comparison.marketId === currentMarket.id ? 'border-emerald-500 bg-emerald-50/10 ring-1 ring-emerald-500/20' : 'border-slate-100 hover:border-slate-200 shadow-3xs'">
                             
                             <div class="mb-2">
                                 <p class="font-bold text-slate-800" x-text="getMarketName(comparison.marketId)"></p>
@@ -226,7 +226,7 @@
 function basketPanelComponent() {
     return {
         lang: 'en',
-        currentMarket: { id: 'pettah', type: 'Retail' },
+        currentMarket: { id: 'peliyagoda', type: 'Retail' },
         
         // Active Basket: references master list IDs
         basket: [
@@ -235,15 +235,15 @@ function basketPanelComponent() {
 
         // Master Dataset including prices across 3 primary Sri Lankan Economic Hub Centers
         vegetables: [
-            { id: '1', name: 'Carrot', localNameSi: 'කැරට්', localNameTa: 'கேரட்', emoji: '🥕', prices: { pettah: 180, dambulla: 150, narahenpita: 170 } },
-            { id: '2', name: 'Beans', localNameSi: 'බෝංචි', localNameTa: 'பீன்ஸ்', emoji: '🫘', prices: { pettah: 240, dambulla: 195, narahenpita: 220 } },
-            { id: '3', name: 'Tomato', localNameSi: 'තක්කාලි', localNameTa: 'தக்காளி', emoji: '🍅', prices: { pettah: 220, dambulla: 180, narahenpita: 240 } },
-            { id: '4', name: 'Leeks', localNameSi: 'ලීක්ස්', localNameTa: 'லீக்ஸ்', emoji: '🥬', prices: { pettah: 300, dambulla: 260, narahenpita: 310 } }
+            { id: '1', name: 'Carrot', localNameSi: 'කැරට්', localNameTa: 'கேரட்', emoji: '🥕', prices: { peliyagoda: 180, dambulla: 150, narahenpita: 170 } },
+            { id: '2', name: 'Beans', localNameSi: 'බෝංචි', localNameTa: 'பீன்ஸ்', emoji: '🫘', prices: { peliyagoda: 240, dambulla: 195, narahenpita: 220 } },
+            { id: '3', name: 'Tomato', localNameSi: 'තක්කාලි', localNameTa: 'தக்காளி', emoji: '🍅', prices: { peliyagoda: 220, dambulla: 180, narahenpita: 240 } },
+            { id: '4', name: 'Leeks', localNameSi: 'ලීක්ස්', localNameTa: 'லீக்ஸ்', emoji: '🥬', prices: { peliyagoda: 300, dambulla: 260, narahenpita: 310 } }
         ],
 
         // Available Markets Framework Metadata
         markets: [
-            { id: 'pettah', nameEn: 'Pettah Market', nameSi: 'පිටකොටුව මැනිං වෙළඳපොළ', nameTa: 'பெட்டா சந்தை', type: 'Retail' },
+            { id: 'peliyagoda', nameEn: 'Peliyagoda Market', nameSi: 'පෑලියගොඩ මැනිං වෙළඳපොළ', nameTa: 'பேலியகொட சந்தை', type: 'Retail' },
             { id: 'dambulla', nameEn: 'Dambulla Eco Center', nameSi: 'දඹුල්ල ආර්ථික මධ්‍යස්ථානය', nameTa: 'தம்புள்ளை பொருளாதார மையம்', type: 'Wholesale' },
             { id: 'narahenpita', nameEn: 'Narahenpita Center', nameSi: 'නාරාහේන්පිට ආර්ථික මධ්‍යස්ථානය', nameTa: 'நாரஹேன்பிட்டா மையம்', type: 'Retail' }
         ],
@@ -263,7 +263,7 @@ function basketPanelComponent() {
                 basketAddEverythingBtn: "Add Everything to Basket",
                 basketEstimatedTotal: "Estimated Market Total",
                 basketComparisonTitle: "Cross-Market Comparison Analytics",
-                dambullaName: "Dambulla", pettahName: "Pettah", narahenpitaName: "Narahenpita",
+                dambullaName: "Dambulla", peliyagodaName: "Peliyagoda", narahenpitaName: "Narahenpita",
                 typeWholesale: "Wholesale Center", typeRetail: "Retail Center", typeEconCenter: "Economic Center"
             },
             si: {
@@ -279,7 +279,7 @@ function basketPanelComponent() {
                 basketAddEverythingBtn: "සියලුම වර්ග කූඩයට එක් කරන්න",
                 basketEstimatedTotal: "ඇස්තමේන්තුගත මුළු එකතුව",
                 basketComparisonTitle: "වෙළඳපොළවල් අතර මිල සැසඳීම",
-                dambullaName: "දඹුල්ල", pettahName: "පිටකොටුව", narahenpitaName: "නාරාහේන්පිට",
+                dambullaName: "දඹුල්ල", peliyagodaName: "පෑලියගොඩ", narahenpitaName: "නාරාහේන්පිට",
                 typeWholesale: "තොග වෙළඳපොළ", typeRetail: "සිල්ලර වෙළඳපොළ", typeEconCenter: "ආර්ථික මධ්‍යස්ථානය"
             },
             ta: {
@@ -295,7 +295,7 @@ function basketPanelComponent() {
                 basketAddEverythingBtn: "அனைத்தையும் கூடையில் சேர்க்கவும்",
                 basketEstimatedTotal: "மதிப்பிடப்பட்ட சந்தை மொத்தம்",
                 basketComparisonTitle: "சந்தைகளுக்கு இடையிலான ஒப்பீட்டு பகுப்பாய்வு",
-                dambullaName: "தம்புள்ளை", pettahName: "பெட்டா", narahenpitaName: "நாரஹேன்பிட்டா",
+                dambullaName: "தம்புள்ளை", peliyagodaName: "பேலியகொட", narahenpitaName: "நாரஹேன்பிட்டா",
                 typeWholesale: "மொத்த விற்பனை மையம்", typeRetail: "சில்லறை விற்பனை மையம்", typeEconCenter: "பொருளாதார மையம்"
             }
         },

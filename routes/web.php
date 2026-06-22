@@ -1,16 +1,32 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PriceDashboardController;
+use Illuminate\Support\Facades\Route;
 
-// Main dashboard view
-Route::get('/', [PriceDashboardController::class, 'index'])->name('dashboard');
+// Main frontend view
+Route::get('/', [PriceDashboardController::class, 'index'])->name('home');
+Route::get('/prices', [PriceDashboardController::class, 'index'])->name('prices');
+Route::get('/trends', [PriceDashboardController::class, 'index'])->name('trends');
+Route::get('/heatmap', [PriceDashboardController::class, 'index'])->name('heatmap');
+Route::get('/about', [PriceDashboardController::class, 'index'])->name('about');
+Route::get('/pipeline', [PriceDashboardController::class, 'index'])->name('pipeline');
 
 // Price API Endpoints
 Route::get('/api/prices/today', [PriceDashboardController::class, 'getPrices']);
 Route::get('/api/prices/history', [PriceDashboardController::class, 'getHistory']);
 
-// Pipeline Management Endpoints
-Route::get('/api/pipeline/status', [PriceDashboardController::class, 'getPipelineStatus']);
-Route::post('/api/pipeline/trigger', [PriceDashboardController::class, 'triggerScrape']);
-Route::post('/api/pipeline/reset', [PriceDashboardController::class, 'resetPipeline']);
+// Admin Dashboard
+Route::get('/admin/dashboard', function () {
+    return view('admin.dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    Route::post('/admin/scrape', [\App\Http\Controllers\ScraperController::class, 'triggerScrape'])->name('admin.scrape');
+});
+
+require __DIR__.'/auth.php';

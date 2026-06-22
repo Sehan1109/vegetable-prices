@@ -37,9 +37,15 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <button @click="$store.theme.toggle()" class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
-                        <i :data-lucide="$store.theme.darkMode ? 'sun' : 'moon'" class="w-5 h-5"></i>
+                    <button @click="$store.theme.toggle()" class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors relative w-5 h-5 flex items-center justify-center">
+                        <template x-if="$store.theme.darkMode">
+                            <i data-lucide="sun" class="w-5 h-5 absolute"></i>
+                        </template>
+                        <template x-if="!$store.theme.darkMode">
+                            <i data-lucide="moon" class="w-5 h-5 absolute"></i>
+                        </template>
                     </button>
+                    <!-- Calls PriceApp's setLang correctly since it's removed from Dashboard -->
                     <button @click="setLang('en')" class="text-xs font-mono font-bold px-2.5 py-1 rounded-md border transition border-emerald-500/30 text-emerald-400 bg-emerald-950/30">EN</button>
                 </div>
             </div>
@@ -48,10 +54,10 @@
 
     <main class="w-full relative z-10 flex-1">
         
-        <div x-show="activeTab === 'home'" x-transition:enter="transition ease-out duration-300" class="space-y-24">
+        <div x-show="activeTab === 'home'" x-transition:enter="transition ease-out duration-300" class="space-y-24" style="{{ ($initialTab ?? 'home') !== 'home' ? 'display: none;' : '' }}">
             
             <!-- Premium Hero Section -->
-            <div class="relative w-full overflow-hidden bg-white">
+            <section class="relative w-full overflow-hidden bg-white dark:bg-slate-950 transition-colors duration-500">
                 <!-- Background Decorative Glows -->
                 <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 w-[600px] h-[600px] bg-emerald-50 rounded-full blur-3xl opacity-50"></div>
                 <div class="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-[400px] h-[400px] bg-slate-50 rounded-full blur-3xl opacity-50"></div>
@@ -72,7 +78,7 @@
                                     <span class="text-[#10B981] block">Prices Across SL</span>
                                 </h1>
                                 <p class="text-slate-500 text-base md:text-lg leading-relaxed max-w-lg font-medium">
-                                    Track fresh market prices, trends, and historical data updated daily. Compare rates between Pettah, Dambulla, and other major national economic centers.
+                                    Track fresh market prices, trends, and historical data updated daily. Compare rates between Peliyagoda, Dambulla, and other major national economic centers.
                                 </p>
                             </div>
 
@@ -213,7 +219,7 @@
                     <div @click="activeTab = 'rates'" class="bg-white border border-slate-200 hover:border-emerald-500/30 p-6 rounded-2xl transition cursor-pointer group dark:bg-slate-900/40 dark:border-slate-800/80">
                         <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-emerald-500 group-hover:text-slate-950 transition mb-4 font-mono font-bold text-xs dark:bg-slate-800 dark:text-slate-400">1</div>
                         <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-2">Check Daily Rates</h4>
-                        <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed mb-4">Sri Lankan vegetable prices fluctuate daily based on rainfall and diesel transport tariffs. Always check Pettah vs Dambulla levels before bulk purchase.</p>
+                        <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed mb-4">Sri Lankan vegetable prices fluctuate daily based on rainfall and diesel transport tariffs. Always check Peliyagoda vs Dambulla levels before bulk purchase.</p>
                         <span class="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1 group-hover:underline">Go to Rates Table <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
                     </div>
 
@@ -250,7 +256,7 @@
                     <div class="bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-800 rounded-2xl p-6 relative">
                         <span class="text-[9px] font-mono font-bold uppercase text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded absolute top-6 right-6">BENCHMARK: Highest Price Peak</span>
                         <p class="text-xs font-mono text-slate-500 dark:text-slate-500">Colombo Terminal</p>
-                        <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Pettah Manning Market</h4>
+                        <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Peliyagoda Manning Market</h4>
                         <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">Representing the primary high-volume retail and final distribution node. Sinks heavy cargo from all over Sri Lanka. Premium price point due to transport margins.</p>
                     </div>
 
@@ -292,7 +298,7 @@
 
         </div>
 
-        <div x-show="activeTab === 'rates'" x-transition style="display: none;">
+        <div x-show="activeTab === 'rates'" x-transition style="{{ ($initialTab ?? 'home') !== 'rates' ? 'display: none;' : '' }}">
             <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div>
@@ -302,9 +308,16 @@
                     <div class="flex flex-wrap gap-3">
                         <input type="text" x-model="searchQuery" placeholder="Filter commodities..." class="bg-white border border-slate-200 text-sm rounded-xl px-4 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900 dark:bg-slate-900 dark:border-slate-800 dark:text-white w-52">
                         <select x-model="selectedMarket" @change="fetchTodayPrices()" class="bg-white border border-slate-200 text-xs rounded-xl p-2.5 text-slate-900 focus:outline-none dark:bg-slate-900 dark:border-slate-800 dark:text-white">
-                            <option value="pettah">Pettah Wholesale</option>
+                            <option value="peliyagoda">Peliyagoda Manning Market</option>
                             <option value="dambulla">Dambulla Economic Centre</option>
-                            <option value="narahenpita">Narahenpita Economic Centre</option>
+                            <option value="kandy">Kandy Market</option>
+                            <option value="meegoda">Meegoda Economic Centre</option>
+                            <option value="norochchole">Norochchole Economic Centre</option>
+                            <option value="thambuththegama">Thambuththegama Economic Centre</option>
+                            <option value="keppetipola">Keppetipola Economic Centre</option>
+                            <option value="nuwara-eliya">Nuwara-Eliya Market</option>
+                            <option value="bandarawela">Bandarawela Market</option>
+                            <option value="veyangoda">Veyangoda Economic Centre</option>
                         </select>
                     </div>
                 </div>
@@ -334,7 +347,7 @@
             </section>
         </div>
 
-        <div x-show="activeTab === 'trends'" x-transition style="display: none;">
+        <div x-show="activeTab === 'trends'" x-transition style="{{ ($initialTab ?? 'home') !== 'trends' ? 'display: none;' : '' }}">
             <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="flex justify-between items-center mb-6">
                     <div>
@@ -357,7 +370,7 @@
             </section>
         </div>
 
-        <div x-show="activeTab === 'heatmap'" x-transition style="display: none;">
+        <div x-show="activeTab === 'heatmap'" x-transition style="{{ ($initialTab ?? 'home') !== 'heatmap' ? 'display: none;' : '' }}">
             <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
                 <div class="max-w-md mx-auto bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-800 p-8 rounded-3xl transition-colors duration-500 shadow-xl">
                     <i data-lucide="map" class="w-12 h-12 text-emerald-400 mx-auto mb-4"></i>
@@ -367,14 +380,14 @@
             </section>
         </div>
 
-        <div x-show="activeTab === 'about'" x-transition style="display: none;">
+        <div x-show="activeTab === 'about'" x-transition style="{{ ($initialTab ?? 'home') !== 'about' ? 'display: none;' : '' }}">
             <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-6">
-                <h2 class="text-2xl font-bold text-white">About the Open Pricing Platform</h2>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">About the Open Pricing Platform</h2>
                 <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">This terminal tracks macro-economic food pricing indices scraped from direct agricultural central market gates. Verified metrics assist in avoiding price exploitation by middle-tier wholesale distribution pools.</p>
             </section>
         </div>
 
-        <div x-show="activeTab === 'pipeline'" x-transition style="display: none;">
+        <div x-show="activeTab === 'pipeline'" x-transition style="{{ ($initialTab ?? 'home') !== 'pipeline' ? 'display: none;' : '' }}">
             <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-slate-900">
                 <div class="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 max-w-xl mx-auto">
                     <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="shield" class="text-emerald-600"></i> HARTI Scraper Control Engine</h2>
@@ -411,10 +424,10 @@
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('Dashboard', () => ({
-            activeTab: 'home',
+            activeTab: '{{ $initialTab ?? "home" }}',
             scrolled: false,
             logoClickCount: 0,
-            selectedMarket: 'pettah',
+            selectedMarket: 'peliyagoda',
             searchQuery: '',
             prices: {},
             loading: false,
@@ -422,51 +435,6 @@
             trendVeg: 'carrot',
             pdfDate: '11 June 2026',
             chartInstance: null,
-
-            // Unified Translations
-            lang: '{{ request()->query('lang', 'en') }}',
-            translations: {
-                en: {
-                    sourcedFrom: "Sourced from HARTI & CBSL",
-                    heroTitle: "Daily Vegetable Prices",
-                    heroTitleColor: "Across Sri Lanka",
-                    heroSub: "Track fresh market prices, trends, and historical data updated daily. Compare rates between Pettah, Dambulla, and other major national economic centers.",
-                    viewToday: "View Today's Prices",
-                    exploreTrends: "Explore Trends",
-                    cbslVerified: "CBSL Official Data Verified",
-                    extractedReport: "Extracted Report Date",
-                    viewPdf: "View PDF",
-                    dambullaEcon: "Dambulla Econ Center",
-                    portalGuide: "Clear Portal Guidelines",
-                    understandingPricing: "Understanding Ceylon Food Pricing",
-                    purposeDesc: "Our purpose is to empower standard householders, vendors, and farmers with direct, simplified market values to bypass trading intermediaries.",
-                    guide1: "1. Check Daily Rates", guide1Desc: "Sri Lankan vegetable prices fluctuate daily based on rainfall and diesel transport tariffs. Always check Pettah vs Dambulla levels before bulk purchase.", goToRates: "Go to Rates Table",
-                    guide2: "2. Compare Hubs", guide2Desc: "Expand our Compare Hub Prices switch to compare prices side-by-side across all major trade hubs in real-time.", startCompare: "Start Comparison",
-                    guide3: "3. Geo Distributions", guide3Desc: "Highlands provide up-country cold crops (Leeks, Potatoes), while low-country dry zones produce Pumpkin & Okra, shipping outward.", viewMap: "View Distribution Map",
-                    guide4: "4. Examine History", guide4Desc: "Analyze seasonal 7, 30, and 90-day graphical charts to buy when pricing curves hit historical lows.", browseHistory: "Browse History"
-                },
-                si: {
-                    sourcedFrom: "හර්ති සහ ශ්‍රී ලංකා මහ බැංකු දත්ත",
-                    heroTitle: "දෛනික එළවළු සහ",
-                    heroTitleColor: "අස්වනු මිල ගණන්",
-                    heroSub: "දෛනිකව යාවත්කාලීන වන වෙළඳපල මිල ගණන් සහ ඓතිහාසික දත්ත පරීක්ෂා කරන්න. පිටකොටුව සහ දඹුල්ල අතර මිල සැසඳීම් සිදු කරන්න.",
-                    viewToday: "අද මිල ගණන් බලන්න",
-                    exploreTrends: "ප්‍රවණතා ගවේෂණය",
-                    cbslVerified: "ශ්‍රී ලංකා මහ බැංකු දත්ත සත්‍යාපිතයි",
-                    extractedReport: "ප්‍රකාශන දිනය",
-                    viewPdf: "PDF බලන්න",
-                    dambullaEcon: "දඹුල්ල ආර්ථික මධ්‍යස්ථානය",
-                    portalGuide: "පෝටල් මාර්ගෝපදේශය",
-                    understandingPricing: "ශ්‍රී ලංකාවේ එළවළු මිල අවබෝධ කර ගැනීම",
-                    purposeDesc: "මෙහි අරමුණ වන්නේ සාමාන්‍ය ගෘහණියන්, වෙළෙන්දන් සහ ගොවීන් සෘජු මිල ගණන් වලින් සවිබල ගැන්වීමයි.",
-                    guide1: "1. දෛනික මිල බලන්න", guide1Desc: "ශ්‍රී ලංකාවේ එළවළු මිල වර්ෂාපතනය මත දිනපතා වෙනස් වේ. මිලදී ගැනීමට පෙර පිටකොටුව සහ දඹුල්ල මිල ගණන් සසඳන්න.", goToRates: "මිල ලැයිස්තුවට",
-                    guide2: "2. වෙළඳපල සසඳන්න", guide2Desc: "සියලුම ප්‍රධාන ආර්ථික මධ්‍යස්ථානවල මිල ගණන් එකිනෙක සසඳා බැලීම සඳහා මෙම පහසුකම භාවිතා කරන්න.", startCompare: "සසඳා බලන්න",
-                    guide3: "3. භූගෝලීය ව්‍යාප්තිය", guide3Desc: "කඳුකර ප්‍රදේශ වලින් උඩරට එළවළුද, පහතරට වියළි කලාපවලින් වට්ටක්කා ආදියද මෙරටට බෙදා හරිනු ලබයි.", viewMap: "සිතියම බලන්න",
-                    guide4: "4. ඉතිහාසය පරීක්ෂා කරන්න", guide4Desc: "මිල ගණන් අවම වන කාල වකවානු හඳුනා ගැනීමට ඓතිහාසික ප්‍රස්ථාර විශ්ලේෂණය කරන්න.", browseHistory: "ඉතිහාසය බලන්න"
-                }
-            },
-
-            get t() { return this.translations[this.lang] || this.translations.en; },
 
             navItems: [
                 { id: 'home', label: 'Home Feed' },
@@ -481,8 +449,6 @@
                 return (names[id] && names[id][this.lang]) ? names[id][this.lang] : id.charAt(0).toUpperCase() + id.slice(1);
             },
 
-            setLang(l) { this.lang = l; },
-
             init() {
                 window.addEventListener('scroll', () => {
                     this.scrolled = window.scrollY > 30;
@@ -490,30 +456,69 @@
 
                 this.fetchTodayPrices();
 
+                // If landing directly on trends tab, load the chart immediately
+                if (this.activeTab === 'trends') {
+                    this.$nextTick(() => this.fetchTrendHistory());
+                }
+
                 this.$watch('activeTab', (value) => {
                     setTimeout(() => { if(window.lucide) { lucide.createIcons(); } }, 60);
                     if (value === 'trends') {
                         this.fetchTrendHistory();
                     }
+                    
+                    const paths = {
+                        'home': '/',
+                        'rates': '/prices',
+                        'trends': '/trends',
+                        'heatmap': '/heatmap',
+                        'about': '/about',
+                        'pipeline': '/pipeline'
+                    };
+                    if (paths[value] && window.location.pathname !== paths[value]) {
+                        window.history.pushState({tab: value}, '', paths[value]);
+                    }
                 });
 
-                // Refresh chart colors and icons when theme changes
+                window.addEventListener('popstate', (event) => {
+                    if (event.state && event.state.tab) {
+                        this.activeTab = event.state.tab;
+                    } else {
+                        const path = window.location.pathname;
+                        if (path === '/prices') this.activeTab = 'rates';
+                        else if (path === '/trends') this.activeTab = 'trends';
+                        else if (path === '/heatmap') this.activeTab = 'heatmap';
+                        else if (path === '/about') this.activeTab = 'about';
+                        else if (path === '/pipeline') this.activeTab = 'pipeline';
+                        else this.activeTab = 'home';
+                    }
+                });
+
+                // Refresh chart colors when theme changes
                 window.addEventListener('theme-changed', () => {
-                    // We use Alpine.raw to access the current component instance inside the listener
-                    const dashboard = document.querySelector('[x-data^="Dashboard"]')._x_dataStack[0];
-                    if (dashboard.activeTab === 'trends') {
-                        dashboard.fetchTrendHistory();
+                    if (this.activeTab === 'trends') {
+                        this.$nextTick(() => this.fetchTrendHistory());
                     }
                 });
             },
 
             get filteredPrices() {
-                if (!this.searchQuery.trim()) return this.prices;
-                let query = this.searchQuery.toLowerCase();
-                return Object.fromEntries(
-                    Object.entries(this.prices).filter(([key]) => key.toLowerCase().includes(query))
-                );
-            },
+    if (!this.prices || typeof this.prices !== 'object') {
+        return {};
+    }
+
+    if (!this.searchQuery?.trim()) {
+        return this.prices;
+    }
+
+    let query = this.searchQuery.toLowerCase();
+
+    return Object.fromEntries(
+        Object.entries(this.prices).filter(([key]) =>
+            key.toLowerCase().includes(query)
+        )
+    );
+},
 
             fetchTodayPrices() {
                 this.loading = true;
@@ -523,13 +528,14 @@
                         return res.json();
                     })
                     .then(data => {
-                        this.prices = data.prices || {};
-                        this.pdfDate = data.scrapedPdfDate || '';
+                        this.prices = data?.prices || {};
+                        this.pdfDate = data?.scrapedPdfDate || '';
                         this.loading = false;
-                        setTimeout(() => { if(window.lucide) { lucide.createIcons(); } }, 50);
+                        this.$nextTick(() => { if(window.lucide) { lucide.createIcons(); } });
                     })
                     .catch(err => {
                         console.error("Error fetching prices", err);
+                        this.prices = {};
                         this.loading = false;
                     });
             },
@@ -540,51 +546,65 @@
             },
 
             fetchTrendHistory() {
-                fetch(`/api/prices/history?vegetableId=${this.trendVeg}&marketId=${this.selectedMarket}&days=30`)
-                    .then(res => {
-                        if (!res.ok) throw new Error('Network response was not ok');
-                        return res.json();
-                    })
-                    .then(data => {
-                        const canvas = document.getElementById('laravelTrendChart');
-                        if (!canvas) return;
-                        
-                        const ctx = canvas.getContext('2d');
-                        const labels = data.history.map(h => h.date);
-                        const datasetData = data.history.map(h => h.price);
+                this.$nextTick(() => {
+                    fetch(`/api/prices/history?vegetableId=${this.trendVeg}&marketId=${this.selectedMarket}&days=30`)
+                        .then(res => {
+                            if (!res.ok) throw new Error('Network response was not ok');
+                            return res.json();
+                        })
+                        .then(data => {
+                            const canvas = document.getElementById('laravelTrendChart');
+                            if (!canvas) return;
+                            
+                            const ctx = canvas.getContext('2d');
+                            const history = Array.isArray(data?.history) ? data.history : [];
 
-                        if (this.chartInstance) {
-                            this.chartInstance.destroy();
-                        }
+                            if (this.chartInstance) {
+                                this.chartInstance.destroy();
+                                this.chartInstance = null;
+                            }
+                            
+                            if (history.length === 0) return;
 
-                        this.chartInstance = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    label: `${this.trendVeg.toUpperCase()} Price (Rs.)`,
-                                    data: datasetData,
-                                    borderColor: '#10b981',
-                                    backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                                    tension: 0.4,
-                                    fill: true,
-                                    borderWidth: 2,
-                                    pointRadius: 2
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: { display: false }
+                            const labels = history.map(h => h.date);
+                            const datasetData = history.map(h => h.price);
+
+                            this.chartInstance = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: `${this.trendVeg.toUpperCase()} Price (Rs.)`,
+                                        data: datasetData,
+                                        borderColor: '#10b981',
+                                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                                        tension: 0.4,
+                                        fill: true,
+                                        borderWidth: 2,
+                                        pointRadius: 2
+                                    }]
                                 },
-                                scales: {
-                                    x: { grid: { display: false }, ticks: { color: Alpine.store('theme').darkMode ? '#94a3b8' : '#64748b', font: { size: 10 } } },
-                                    y: { grid: { color: Alpine.store('theme').darkMode ? '#1e293b' : '#e2e8f0' }, ticks: { color: Alpine.store('theme').darkMode ? '#64748b' : '#475569', font: { size: 10 } } }
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: false }
+                                    },
+                                    scales: {
+                                        x: { grid: { display: false }, ticks: { color: Alpine.store('theme').darkMode ? '#94a3b8' : '#64748b', font: { size: 10 } } },
+                                        y: { grid: { color: Alpine.store('theme').darkMode ? '#1e293b' : '#e2e8f0' }, ticks: { color: Alpine.store('theme').darkMode ? '#64748b' : '#475569', font: { size: 10 } } }
+                                    }
                                 }
+                            });
+                        })
+                        .catch(err => {
+                            console.error("Error fetching trend history:", err);
+                            if (this.chartInstance) {
+                                this.chartInstance.destroy();
+                                this.chartInstance = null;
                             }
                         });
-                    });
+                });
             },
 
             triggerScraperPipeline() {

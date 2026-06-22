@@ -29,10 +29,19 @@ class PriceDashboardController extends Controller
     {
         $lang = $request->query('lang', 'en');
         $todayPrices = PriceRecord::whereDate('date', Carbon::today())->get();
+        
+        $path = $request->path();
+        $activeTab = 'home';
+        if ($path == 'prices') $activeTab = 'rates';
+        elseif ($path == 'trends') $activeTab = 'trends';
+        elseif ($path == 'heatmap') $activeTab = 'heatmap';
+        elseif ($path == 'about') $activeTab = 'about';
+        elseif ($path == 'pipeline') $activeTab = 'pipeline';
 
         return view('dashboard', [
             'lang' => $lang,
-            'todayPrices' => $todayPrices
+            'todayPrices' => $todayPrices,
+            'initialTab' => $activeTab
         ]);
     }
 
@@ -42,7 +51,7 @@ class PriceDashboardController extends Controller
      */
     public function getPrices(Request $request)
     {
-        $marketId = $request->query('marketId', 'pettah');
+        $marketId = $request->query('marketId', 'peliyagoda');
         
         // Latest ම තියෙන දිනය හොයාගන්නවා
         $latestRecord = PriceRecord::where('market_id', $marketId)
@@ -94,7 +103,7 @@ class PriceDashboardController extends Controller
     public function getHistory(Request $request)
     {
         $vegetableId = $request->query('vegetableId', 'carrot');
-        $marketId = $request->query('marketId', 'pettah');
+        $marketId = $request->query('marketId', 'peliyagoda');
         $days = (int) $request->query('days', 30);
 
         $records = PriceRecord::where('market_id', $marketId)

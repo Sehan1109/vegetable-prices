@@ -14,8 +14,11 @@ class VegetableNormalizer
         'big onion (imp)'      => 'big-onion-imported',
         'big onion (local)'    => 'big-onion-local',
         'big onion'            => 'big-onion',
+        'big-onion local'      => 'big-onion-local',       // HARTI hyphen variant
+        'b\'onion imported'    => 'big-onion-imported',    // HARTI abbreviated form
+        'b\'onion'             => 'big-onion',             // HARTI abbreviated form
         'red onion (imp)'      => 'red-onion-imported',
-        'red onion (lmp)'      => 'red-onion-imported',   // typo in PDF
+        'red onion (lmp)'      => 'red-onion-imported',    // typo in PDF
         'red onion (local)'    => 'red-onion-local',
         'red onion'            => 'red-onion',
         'small onion'          => 'small-onion',
@@ -29,6 +32,7 @@ class VegetableNormalizer
         'kohila'               => 'kohila',
         'kathurumurunga'       => 'kathurumurunga',
         'spinach'              => 'spinach',
+        'knolkhol'             => 'knolkhol',          // HARTI name
         'cabbage'              => 'cabbage',
 
         // Gourds & Squash
@@ -52,22 +56,28 @@ class VegetableNormalizer
         'beet root'            => 'beetroot',
         'beetroot'             => 'beetroot',
         'radish'               => 'radish',
+        'raddish'              => 'radish',            // HARTI typo variant
         'manioc'               => 'manioc',
         'sweet potato'         => 'sweet-potato',
         'potato (local)'       => 'potato-local',
         'potato (imp)'         => 'potato-imported',
+        'potato(imp'           => 'potato-imported',   // HARTI no-space variant
+        'welimada'             => 'potato-local',      // HARTI "Potato (Welimada)"
         'potato'               => 'potato',
 
         // Fruity Veg
         'brinjal'              => 'brinjal',
+        'eggplant'             => 'brinjal',           // HARTI name
         'tomato'               => 'tomato',
         'capsicum'             => 'capsicum',
+        'cucumber'             => 'cucumber',          // HARTI name
         'green chilli'         => 'green-chilli',
         'dried chilli (imp)'   => 'dry-chilli-imported',
         'dry chilli'           => 'dry-chilli',
         'chilli'               => 'chilli',
         'okra'                 => 'okra',
         'ladies fingers'       => 'okra',
+        'drumstick'            => 'drumstick',         // HARTI name
 
         // Spices
         'ginger'               => 'ginger',
@@ -132,25 +142,33 @@ class VegetableNormalizer
      * Map of CBSL market name patterns → market_id slugs.
      */
     private static array $marketMap = [
-        'pettah'        => 'pettah',
-        'manning'       => 'manning',
-        'dambulla'      => 'dambulla',
-        'narahenpita'   => 'narahenpita',
-        'peliyagoda'    => 'peliyagoda',
-        'negombo'       => 'negombo',
-        'kurunegala'    => 'kurunegala',
-        'kandy'         => 'kandy',
-        'nuwara eliya'  => 'nuwara-eliya',
-        'matale'        => 'matale',
-        'galle'         => 'galle',
-        'hambantota'    => 'hambantota',
-        'anuradhapura'  => 'anuradhapura',
-        'jaffna'        => 'jaffna',
-        'trincomalee'   => 'trincomalee',
-        'badulla'       => 'badulla',
-        'ratnapura'     => 'ratnapura',
-        'kalutara'      => 'kalutara',
-        'colombo'       => 'pettah',    // CBSL sometimes writes Colombo
+        'pettah'           => 'pettah',
+        'manning'          => 'manning',
+        'dambulla'         => 'dambulla',
+        'narahenpita'      => 'narahenpita',
+        'peliyagoda'       => 'peliyagoda',
+        'negombo'          => 'negombo',
+        'kurunegala'       => 'kurunegala',
+        'kandy'            => 'kandy',
+        'nuwara eliya'     => 'nuwara-eliya',
+        'nuwaraeliya'      => 'nuwara-eliya',   // HARTI no-space variant
+        'matale'           => 'matale',
+        'galle'            => 'galle',
+        'hambantota'       => 'hambantota',
+        'anuradhapura'     => 'anuradhapura',
+        'jaffna'           => 'jaffna',
+        'trincomalee'      => 'trincomalee',
+        'badulla'          => 'badulla',
+        'ratnapura'        => 'ratnapura',
+        'kalutara'         => 'kalutara',
+        'colombo'          => 'pettah',         // CBSL sometimes writes Colombo
+        // HARTI-specific markets
+        'meegoda'          => 'meegoda',
+        'norochchole'      => 'norochchole',
+        'thambuththegama'  => 'thambuththegama',
+        'keppetipola'      => 'keppetipola',
+        'bandarawela'      => 'bandarawela',
+        'veyangoda'        => 'veyangoda',
     ];
 
     /**
