@@ -38,34 +38,34 @@
 
                 <div class="flex items-center gap-4">
                     <button
-    @click="$store.theme.toggle()"
-    class="w-10 h-10 rounded-lg flex items-center justify-center
-           text-slate-600 hover:text-slate-900
-           dark:text-slate-400 dark:hover:text-white"
->
-    <svg x-show="$store.theme.darkMode"
-         xmlns="http://www.w3.org/2000/svg"
-         width="20"
-         height="20"
-         viewBox="0 0 24 24"
-         fill="none"
-         stroke="currentColor"
-         stroke-width="2">
-        <circle cx="12" cy="12" r="5"/>
-        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-    </svg>
+                        @click="$store.theme.toggle()"
+                        class="w-10 h-10 rounded-lg flex items-center justify-center
+                            text-slate-600 hover:text-slate-900
+                            dark:text-slate-400 dark:hover:text-white"
+                    >
+                        <svg x-show="$store.theme.darkMode"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
 
-    <svg x-show="!$store.theme.darkMode"
-         xmlns="http://www.w3.org/2000/svg"
-         width="20"
-         height="20"
-         viewBox="0 0 24 24"
-         fill="none"
-         stroke="currentColor"
-         stroke-width="2">
-        <path d="M12 3a9 9 0 1 0 9 9A7 7 0 0 1 12 3z"/>
-    </svg>
-</button>
+                        <svg x-show="!$store.theme.darkMode"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 3a9 9 0 1 0 9 9A7 7 0 0 1 12 3z"/>
+                        </svg>
+                    </button>
 
                     <button @click="setLang('en')"
                         class="text-xs font-mono font-bold px-2.5 py-1 rounded-md border transition border-emerald-500/30 text-emerald-400 bg-emerald-950/30">
@@ -123,11 +123,11 @@
                                         <i data-lucide="shield-check" class="w-6 h-6"></i>
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-bold text-slate-900">CBSL Official Data Verified</h4>
-                                        <p class="text-xs text-emerald-600/70 font-mono mt-0.5">Extracted: <span x-text="pdfDate || '2026-06-11'"></span></p>
+                                        <h4 class="text-sm font-bold text-slate-900">HARTI Official Data Verified</h4>
+                                        <p class="text-xs text-emerald-600/70 font-mono mt-0.5">Extracted: <span x-text="pdfDate"></span></p>
                                     </div>
                                 </div>
-                                <a href="https://www.cbsl.gov.lk/en/statistics/economic-indicators/price-report" target="_blank" class="p-2.5 rounded-xl bg-white border border-emerald-100 text-emerald-600 transition-all hover:bg-emerald-500 hover:text-white shadow-sm">
+                                <a :href="pdfUrl" x-show="pdfUrl" target="_blank" class="p-2.5 rounded-xl bg-white border border-emerald-100 text-emerald-600 transition-all hover:bg-emerald-500 hover:text-white shadow-sm">
                                     <i data-lucide="file-text" class="w-4 h-4"></i>
                                 </a>
                             </div>
@@ -457,7 +457,8 @@
             loading: false,
             scraping: false,
             trendVeg: 'carrot',
-            pdfDate: '11 June 2026',
+            pdfDate: '',
+            pdfUrl: '',
             chartInstance: null,
 
             navItems: [
@@ -554,6 +555,7 @@
                     .then(data => {
                         this.prices = data?.prices || {};
                         this.pdfDate = data?.scrapedPdfDate || '';
+                        this.pdfUrl = data?.scrapedPdfUrl || '';
                         this.loading = false;
                         this.$nextTick(() => { if(window.lucide) { lucide.createIcons(); } });
                     })

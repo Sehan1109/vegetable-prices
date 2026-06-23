@@ -96,6 +96,8 @@ class ScrapeHartiPrices extends Command
                                 'lastAutoUpdateDate' => $hartiDate,
                                 'source'             => 'harti'
                             ]);
+                            Cache::forever('scraped_pdf_url', $hartiUrl);
+                            Cache::forever('scraped_pdf_date', $hartiDate);
                             $this->addLog("[HARTI] Pipeline complete: {$saved} records for {$hartiDate}.", 'success');
                             $this->info("✔ Done (HARTI) — {$saved} price records saved for {$hartiDate}.");
                             return Command::SUCCESS;
@@ -146,6 +148,8 @@ class ScrapeHartiPrices extends Command
                             'lastAutoUpdateDate' => $cbslDate,
                             'source'             => 'cbsl'
                         ]);
+                        Cache::forever('scraped_pdf_url', $cbslUrl);
+                        Cache::forever('scraped_pdf_date', $cbslDate);
                         $this->addLog("[CBSL] Pipeline complete: {$saved} records for {$cbslDate}.", 'success');
                         $this->info("✔ Done (CBSL fallback) — {$saved} price records saved for {$cbslDate}.");
                         return Command::SUCCESS;

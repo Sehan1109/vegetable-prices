@@ -82,8 +82,8 @@ class PriceDashboardController extends Controller
                 'date' => $date,
                 'marketId' => $marketId,
                 'prices' => $pricesMap,
-                'scrapedPdfUrl' => Cache::get('scraped_pdf_url', 'https://www.cbsl.gov.lk/en/statistics/economic-indicators/price-report'),
-                'scrapedPdfDate' => Cache::get('scraped_pdf_date', null)
+                'scrapedPdfUrl' => Cache::get('scraped_pdf_url'),
+                'scrapedPdfDate' => Cache::get('scraped_pdf_date')
             ]);
         }
 
@@ -91,8 +91,8 @@ class PriceDashboardController extends Controller
             'date' => 'unknown',
             'marketId' => $marketId,
             'prices' => (object)[],
-            'scrapedPdfUrl' => Cache::get('scraped_pdf_url', 'https://www.cbsl.gov.lk/en/statistics/economic-indicators/price-report'),
-            'scrapedPdfDate' => Cache::get('scraped_pdf_date', null)
+            'scrapedPdfUrl' => Cache::get('scraped_pdf_url'),
+            'scrapedPdfDate' => Cache::get('scraped_pdf_date')
         ]);
     }
 
