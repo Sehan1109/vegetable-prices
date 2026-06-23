@@ -307,14 +307,51 @@
                     <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Click any vegetable card to automatically plot its daily price variations on the Trends chart below.</p>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <template x-for="(marketData, vegId) in prices" :key="vegId">
-                        <div @click="viewTrendFor(vegId)" class="bg-white hover:bg-slate-100 border border-slate-200 hover:border-emerald-500/30 rounded-2xl p-4 transition cursor-pointer flex items-center justify-between dark:bg-slate-900 dark:hover:bg-slate-800 dark:border-slate-800">
-                            <div>
-                                <h5 class="text-sm font-bold text-slate-900 dark:text-white capitalize" x-text="vegId"></h5>
-                                <p class="text-xs font-mono text-emerald-400 mt-1" x-text="'Rs. ' + marketData.price"></p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <template x-for="vegId in popularVegetables" :key="vegId">
+                        <div x-show="prices[vegId]" 
+                             @click="viewTrendFor(vegId); setTimeout(() => document.getElementById('laravelTrendChart').scrollIntoView({behavior: 'smooth', block: 'center'}), 100);"
+                             class="group relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-[24px] p-5 cursor-pointer transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.15)] hover:border-emerald-500/30 dark:hover:border-emerald-500/30 overflow-hidden">
+                            
+                            <!-- Subtle Background Glow on Hover -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-transparent to-emerald-50/50 dark:to-emerald-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                            
+                            <!-- Header: Icon & Action -->
+                            <div class="flex items-start justify-between mb-4 relative z-10">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-[16px] bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-inner border border-slate-100 dark:border-slate-700 transition-colors group-hover:bg-white dark:group-hover:bg-slate-700" x-text="vegetableMeta[vegId]?.icon"></div>
+                                    <h5 class="text-base font-bold text-slate-900 dark:text-white tracking-tight" x-text="vegetableMeta[vegId]?.name"></h5>
+                                </div>
+                                <button class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-emerald-500 group-hover:border-emerald-200 dark:group-hover:border-emerald-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/30 transition-all duration-300 shadow-sm">
+                                    <i data-lucide="plus" class="w-4 h-4 transition-transform group-hover:rotate-90"></i>
+                                </button>
                             </div>
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 dark:text-slate-600"></i>
+
+                            <!-- Price -->
+                            <div class="mb-4 relative z-10">
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-sm font-mono text-slate-400 dark:text-slate-500 font-bold">Rs.</span>
+                                    <span class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tighter" x-text="prices[vegId]?.price"></span>
+                                </div>
+                            </div>
+
+                            <!-- Metrics -->
+                            <div class="flex items-center gap-3 relative z-10">
+                                <!-- Daily Change -->
+                                <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border backdrop-blur-sm transition-colors"
+                                     :class="prices[vegId]?.changePercent >= 0 ? 'bg-emerald-50/50 border-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' : 'bg-rose-50/50 border-rose-100 text-rose-600 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400'">
+                                    <i :data-lucide="prices[vegId]?.changePercent >= 0 ? 'trending-up' : 'trending-down'" class="w-3.5 h-3.5"></i>
+                                    <span class="text-xs font-bold font-mono" x-text="(prices[vegId]?.changePercent > 0 ? '+' : '') + prices[vegId]?.changePercent + '%'"></span>
+                                    <span class="text-[9px] font-semibold uppercase tracking-wider opacity-60 ml-0.5">1D</span>
+                                </div>
+                                
+                                <!-- Yearly Change -->
+                                <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border backdrop-blur-sm transition-colors"
+                                     :class="prices[vegId]?.changePercentYear >= 0 ? 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'">
+                                    <span class="text-xs font-bold font-mono" x-text="(prices[vegId]?.changePercentYear > 0 ? '+' : '') + (prices[vegId]?.changePercentYear || 0) + '%'"></span>
+                                    <span class="text-[9px] font-semibold uppercase tracking-wider opacity-60 ml-0.5">1Y</span>
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -468,6 +505,14 @@
                 { id: 'heatmap', label: 'Heatmap View' },
                 { id: 'about', label: 'About App' }
             ],
+
+            vegetableMeta: {
+                tomato: { name: 'Tomato', icon: '🍅' },
+                carrot: { name: 'Carrot', icon: '🥕' },
+                cabbage: { name: 'Cabbage', icon: '🥬' },
+                pumpkin: { name: 'Pumpkin', icon: '🎃' }
+            },
+            popularVegetables: ['tomato', 'carrot', 'cabbage', 'pumpkin'],
 
             getVegLocalName(id) {
                 const names = { carrot: { si: 'කැරට්', en: 'Carrot' }, tomato: { si: 'තක්කාලි', en: 'Tomato' } };

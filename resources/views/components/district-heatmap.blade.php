@@ -214,7 +214,7 @@
                                 <span class="text-[9px] font-mono tracking-widest text-emerald-400 font-bold uppercase">SELECTED DISTRICT UNIT</span>
                                 <div class="flex items-center gap-1 text-[9px] text-slate-400 font-mono pl-3">
                                     <i data-lucide="calendar" class="w-3 h-3 text-slate-600"></i>
-                                    <span x-text="payloadDate"></span>
+                                    <span x-text="formattedPayloadDate"></span>
                                 </div>
                             </div>
 
@@ -318,7 +318,7 @@
                                     </div>
                                     <div class="flex justify-between border-t border-slate-800 pt-1 mt-1 text-[9px] text-slate-500">
                                         <span>Updated:</span>
-                                        <span x-text="payloadDate"></span>
+                                        <span x-text="formattedPayloadDate"></span>
                                     </div>
                                 </div>
                             </div>
@@ -411,11 +411,11 @@
 
                                     <!-- Label -->
                                     <text :x="dist.cx" :y="dist.cy + 13" text-anchor="middle" 
-+                                         :class="{
-+                                             'fill-slate-950 font-black text-[8.5px]': selectedDistrictId === dist.id, 
-+                                             'fill-slate-800 text-[8px]': hoveredDistrictId === dist.id, 
-+                                             'fill-slate-650 font-bold opacity-80 text-[7.2px]': selectedDistrictId !== dist.id && hoveredDistrictId !== dist.id
-+                                         }"
+                                        :class="{
+                                             'fill-slate-950 font-black text-[8.5px]': selectedDistrictId === dist.id, 
+                                             'fill-slate-800 text-[8px]': hoveredDistrictId === dist.id, 
+                                             'fill-slate-800 font-bold opacity-80 text-[7.2px]': selectedDistrictId !== dist.id && hoveredDistrictId !== dist.id
+                                         }"
                                           class="font-sans select-none drop-shadow-md tracking-tight uppercase"
                                           style="letter-spacing: 0.02em; text-shadow: 0 1px 2px rgba(255,255,255,0.8)"
                                           x-text="dist.name.split(' ')[0]">
@@ -699,6 +699,7 @@
 </div>
 
 <script>
+
     // Make sure Lucide icons are re-rendered when Alpine finishes loading
     document.addEventListener('alpine:initialized', () => {
         if(window.lucide) { lucide.createIcons(); }
@@ -709,14 +710,18 @@
             serverLoading: true,
             serverError: false,
             offlineFallback: false,
-            allMarketsPayload: null,
+
+            // --- Live data fetched from the backend ---
+            liveDistrictData: [],        // Array of district objects with real computed prices
+            liveNationalStats: null,     // National summary object
+            payloadDate: null,           // Date of the latest data
 
             selectedCategory: 'all',
             displayMode: 'prices',
             selectedDistrictId: 'nuwara_eliya',
             hoveredDistrictId: null,
             showGlassModal: false,
-            
+
             compareDistrictIdA: 'nuwara_eliya',
             compareDistrictIdB: 'colombo',
 
@@ -726,129 +731,191 @@
                 { id: 'other', label: 'Other Staples' }
             ],
 
-            vegetables: [
-                { id: 'carrot', name: 'Carrot', category: 'vegetables', basePrice: 280 },
-                { id: 'leeks', name: 'Leeks', category: 'vegetables', basePrice: 220 },
-                { id: 'tomato', name: 'Tomato', category: 'vegetables', basePrice: 350 },
-                { id: 'onion', name: 'Red Onion', category: 'other', basePrice: 400 },
-                { id: 'pumpkin', name: 'Pumpkin', category: 'vegetables', basePrice: 150 },
-                { id: 'cabbage', name: 'Cabbage', category: 'vegetables', basePrice: 180 }
+            // ---------------------------------------------------------------
+            // OFFLINE FALLBACK: only used when server is unreachable
+            // ---------------------------------------------------------------
+            offlineDistrictData: [
+                { id: 'jaffna',       name: 'Jaffna',               localNameSi: 'යාපනය',         localNameTa: 'யாழ்ப்பாணம்',    province: 'Northern Province',      computedAveragePrice: 295, computedAveragePricePrevWeek: 290, trendPercent: 1.7,  highestCropName: 'Green Chilli', highestCropPrice: 520, lowestCropName: 'Pumpkin', lowestCropPrice: 90,  primaryCrops: ['Red Onion', 'Green Chillies', 'Ladies Fingers'], role: 'Production',    cx: 120, cy: 110, r: 20 },
+                { id: 'anuradhapura', name: 'Anuradhapura',         localNameSi: 'අනුරාධපුරය',    localNameTa: 'அனுராதபுரம்',     province: 'North Central Province', computedAveragePrice: 248, computedAveragePricePrevWeek: 255, trendPercent: -2.7, highestCropName: 'Bitter Gourd', highestCropPrice: 490, lowestCropName: 'Pumpkin', lowestCropPrice: 102, primaryCrops: ['Pumpkin', 'Ladies Fingers', 'Manioc'],           role: 'Production',    cx: 160, cy: 300, r: 24 },
+                { id: 'puttalam',     name: 'Puttalam',             localNameSi: 'පුත්තලම',       localNameTa: 'புத்தளம்',         province: 'North Western Province', computedAveragePrice: 305, computedAveragePricePrevWeek: 298, trendPercent: 2.3,  highestCropName: 'Red Onion',    highestCropPrice: 350, lowestCropName: 'Manioc',  lowestCropPrice: 85,  primaryCrops: ['Red Onion', 'Brinjal'],                          role: 'Production',    cx: 90,  cy: 400, r: 22 },
+                { id: 'trincomalee',  name: 'Trincomalee',          localNameSi: 'ත්‍රිකුණාමලය', localNameTa: 'திருகோணமலை',      province: 'Eastern Province',       computedAveragePrice: 310, computedAveragePricePrevWeek: 305, trendPercent: 1.6,  highestCropName: 'Tomato',       highestCropPrice: 580, lowestCropName: 'Pumpkin', lowestCropPrice: 100, primaryCrops: ['Brinjal', 'Tomato'],                             role: 'Distribution', cx: 260, cy: 280, r: 20 },
+                { id: 'dambulla',     name: 'Dambulla Hub',         localNameSi: 'දඹුල්ල',        localNameTa: 'தம்புள்ளை',       province: 'Central Province',       computedAveragePrice: 260, computedAveragePricePrevWeek: 270, trendPercent: -3.7, highestCropName: 'Tomato',       highestCropPrice: 578, lowestCropName: 'Pumpkin', lowestCropPrice: 102, primaryCrops: ['Tomato', 'Pumpkin', 'Capsicum'],                 role: 'Distribution', cx: 190, cy: 420, r: 28 },
+                { id: 'kandy',        name: 'Kandy',                localNameSi: 'මහනුවර',        localNameTa: 'கண்டி',            province: 'Central Province',       computedAveragePrice: 330, computedAveragePricePrevWeek: 320, trendPercent: 3.1,  highestCropName: 'Green Beans',  highestCropPrice: 435, lowestCropName: 'Cabbage',  lowestCropPrice: 137, primaryCrops: ['Leeks', 'Cabbage', 'Beans'],                    role: 'Distribution', cx: 190, cy: 500, r: 22 },
+                { id: 'nuwara_eliya', name: 'Nuwara Eliya',         localNameSi: 'නුවරඑළිය',      localNameTa: 'நுவரெலியா',        province: 'Central Province',       computedAveragePrice: 270, computedAveragePricePrevWeek: 265, trendPercent: 1.9,  highestCropName: 'Green Beans',  highestCropPrice: 430, lowestCropName: 'Radish',   lowestCropPrice: 107, primaryCrops: ['Carrot', 'Leeks', 'Beetroot', 'Potato'],        role: 'Production',    cx: 180, cy: 580, r: 26 },
+                { id: 'badulla',      name: 'Badulla (Welimada)',   localNameSi: 'බදුල්ල',        localNameTa: 'பதுளை',            province: 'Uva Province',           computedAveragePrice: 275, computedAveragePricePrevWeek: 268, trendPercent: 2.6,  highestCropName: 'Bitter Gourd', highestCropPrice: 492, lowestCropName: 'Radish',   lowestCropPrice: 107, primaryCrops: ['Potato', 'Carrot', 'Cabbage'],                  role: 'Production',    cx: 260, cy: 560, r: 24 },
+                { id: 'colombo',      name: 'Colombo (Pettah)',     localNameSi: 'කොළඹ',          localNameTa: 'கொழும்பு',         province: 'Western Province',       computedAveragePrice: 390, computedAveragePricePrevWeek: 375, trendPercent: 4.0,  highestCropName: 'Green Chilli', highestCropPrice: 535, lowestCropName: 'Pumpkin',  lowestCropPrice: 84,  primaryCrops: ['Urban Premium Retail', 'Imported Goods'],       role: 'Consumption',   cx: 70,  cy: 590, r: 30 },
+                { id: 'galle',        name: 'Galle',                localNameSi: 'ගාල්ල',         localNameTa: 'காலி',             province: 'Southern Province',      computedAveragePrice: 365, computedAveragePricePrevWeek: 358, trendPercent: 1.9,  highestCropName: 'Green Chilli', highestCropPrice: 540, lowestCropName: 'Pumpkin',  lowestCropPrice: 88,  primaryCrops: ['Low Country Sinks', 'Retail'],                  role: 'Consumption',   cx: 100, cy: 720, r: 22 },
+                { id: 'hambantota',   name: 'Hambantota',           localNameSi: 'හම්බන්තොට',     localNameTa: 'அம்பாந்தோட்டை',   province: 'Southern Province',      computedAveragePrice: 300, computedAveragePricePrevWeek: 295, trendPercent: 1.7,  highestCropName: 'Snake Gourd',  highestCropPrice: 225, lowestCropName: 'Pumpkin',  lowestCropPrice: 100, primaryCrops: ['Pumpkin', 'Brinjal'],                           role: 'Production',    cx: 230, cy: 720, r: 22 },
+                { id: 'moneragala',   name: 'Moneragala',           localNameSi: 'මොණරාගල',       localNameTa: 'மொனராகலை',         province: 'Uva Province',           computedAveragePrice: 285, computedAveragePricePrevWeek: 280, trendPercent: 1.8,  highestCropName: 'Bitter Gourd', highestCropPrice: 492, lowestCropName: 'Pumpkin',  lowestCropPrice: 102, primaryCrops: ['Pumpkin', 'Ladies Fingers'],                    role: 'Production',    cx: 280, cy: 650, r: 24 },
             ],
 
-            districtData: [
-                { id: 'jaffna', name: 'Jaffna', localNameSi: 'යාපනය', localNameTa: 'யாழ்ப்பாணம்', province: 'Northern Province', avgPriceIndex: 0.92, primaryCrops: ['Red Onion', 'Green Chillies', 'Ladies Fingers (Okra)'], role: 'Production', cx: 120, cy: 110, r: 20 },
-                { id: 'anuradhapura', name: 'Anuradhapura', localNameSi: 'අනුරාධපුරය', localNameTa: 'அனுராதபுரம்', province: 'North Central Province', avgPriceIndex: 0.88, primaryCrops: ['Pumpkin', 'Ladies Fingers (Okra)'], role: 'Production', cx: 160, cy: 300, r: 24 },
-                { id: 'puttalam', name: 'Puttalam', localNameSi: 'පුත්තලම', localNameTa: 'புத்தளம்', province: 'North Western Province', avgPriceIndex: 0.95, primaryCrops: ['Red Onion', 'Brinjal (Eggplant)'], role: 'Production', cx: 90, cy: 400, r: 22 },
-                { id: 'trincomalee', name: 'Trincomalee', localNameSi: 'ත්‍රිකුණාමලය', localNameTa: 'திருகோணமலை', province: 'Eastern Province', avgPriceIndex: 0.98, primaryCrops: ['Brinjal (Eggplant)', 'Tomato'], role: 'Distribution', cx: 260, cy: 280, r: 20 },
-                { id: 'dambulla', name: 'Dambulla Hub', localNameSi: 'දඹුල්ල', localNameTa: 'தம்புள்ளை', province: 'Central Province', avgPriceIndex: 0.81, primaryCrops: ['Tomato', 'Pumpkin', 'Capsicum'], role: 'Distribution', cx: 190, cy: 420, r: 28 },
-                { id: 'kandy', name: 'Kandy', localNameSi: 'මහනුවර', localNameTa: 'கண்டி', province: 'Central Province', avgPriceIndex: 1.02, primaryCrops: ['Leeks', 'Cabbage', 'Beans'], role: 'Distribution', cx: 190, cy: 500, r: 22 },
-                { id: 'nuwara_eliya', name: 'Nuvara Eliya', localNameSi: 'නුවරඑළිය', localNameTa: 'நுவரெலியா', province: 'Central Province', avgPriceIndex: 0.83, primaryCrops: ['Carrot', 'Leeks', 'Beetroot', 'Potato'], role: 'Production', cx: 180, cy: 580, r: 26 },
-                { id: 'badulla', name: 'Badulla (Welimada)', localNameSi: 'බදුල්ල', localNameTa: 'பதுளை', province: 'Uva Province', avgPriceIndex: 0.85, primaryCrops: ['Potato', 'Carrot', 'Cabbage'], role: 'Production', cx: 260, cy: 560, r: 24 },
-                { id: 'colombo', name: 'Colombo (Narahenpita)', localNameSi: 'කොළඹ', localNameTa: 'கொழும்பு', province: 'Western Province', avgPriceIndex: 1.20, primaryCrops: ['Urban Premium Retail Sink', 'Imports'], role: 'Consumption', cx: 70, cy: 590, r: 30 },
-                { id: 'galle', name: 'Galle', localNameSi: 'ගාල්ල', localNameTa: 'காலி', province: 'Southern Province', avgPriceIndex: 1.14, primaryCrops: ['Low Country Sinks', 'Galle Retail'], role: 'Consumption', cx: 100, cy: 720, r: 22 },
-                { id: 'hambantota', name: 'Hambantota', localNameSi: 'හම්බන්තොට', localNameTa: 'அம்பாந்தோட்டை', province: 'Southern Province', avgPriceIndex: 0.94, primaryCrops: ['Pumpkin', 'Brinjal (Eggplant)'], role: 'Production', cx: 230, cy: 720, r: 22 },
-                { id: 'moneragala', name: 'Moneragala', localNameSi: 'මොණරාගල', localNameTa: 'மொனராகலை', province: 'Uva Province', avgPriceIndex: 0.89, primaryCrops: ['Pumpkin', 'Ladies Fingers (Okra)'], role: 'Production', cx: 280, cy: 650, r: 24 }
-            ],
-
+            // ---------------------------------------------------------------
+            // DATA INIT / FETCH
+            // ---------------------------------------------------------------
             async initData() {
                 this.serverLoading = true;
-                
-                // Simulate an API Fetch delay
-                setTimeout(() => {
-                    // Simulate payload success or fallback depending on reality
-                    this.allMarketsPayload = { date: '2026-06-11', markets: {} };
-                    this.serverLoading = false;
-
-                    // Trigger Alpine icons re-render explicitly after load
-                    this.$nextTick(() => {
-                        if(window.lucide) { lucide.createIcons(); }
-                    });
-                }, 1200);
+                this.serverError = false;
+                await this.fetchData();
             },
 
             async fetchData() {
-                this.initData();
-            },
+                this.serverLoading = true;
+                this.serverError = false;
 
-            // Computes the dynamic lists based on filters and raw data
-            get calculatedMetrics() {
-                return this.districtData.map(dist => {
-                    let indexModifier = 0;
-                    if (this.selectedCategory === 'vegetables' && ['nuwara_eliya', 'badulla', 'kandy'].includes(dist.id)) indexModifier = -0.09;
-                    if (this.selectedCategory === 'vegetables' && ['colombo', 'galle', 'jaffna'].includes(dist.id)) indexModifier = 0.14;
-                    if (this.selectedCategory === 'other' && ['anuradhapura', 'hambantota'].includes(dist.id)) indexModifier = -0.07;
+                try {
+                    const [distRes, sumRes] = await Promise.all([
+                        fetch('/api/heatmap/districts'),
+                        fetch('/api/heatmap/summary'),
+                    ]);
 
-                    let baseFactor = dist.avgPriceIndex + indexModifier;
-                    let validCrops = this.vegetables.filter(v => this.selectedCategory === 'all' || v.category === this.selectedCategory);
-                    if (validCrops.length === 0) validCrops = this.vegetables;
+                    if (!distRes.ok || !sumRes.ok) throw new Error('API error');
 
-                    let cropPrices = validCrops.map(v => {
-                        let pt = Math.round((v.basePrice * baseFactor) / 5) * 5;
-                        let pp = Math.round(((v.basePrice * 0.95) * baseFactor) / 5) * 5;
-                        return { name: v.name, priceToday: pt, pricePrevWeek: pp };
+                    const distJson = await distRes.json();
+                    const sumJson  = await sumRes.json();
+
+                    if (!distJson.districts || distJson.districts.length === 0) {
+                        throw new Error('No district data returned');
+                    }
+
+                    // Build a lookup map keyed by district id
+                    const liveMap = {};
+                    distJson.districts.forEach(d => { liveMap[d.id] = d; });
+
+                    // Merge live data into offline baseline (fills in map coords, names etc.)
+                    this.liveDistrictData = this.offlineDistrictData.map(offline => {
+                        const live = liveMap[offline.id];
+                        if (live && live.computedAveragePrice !== null) {
+                            return {
+                                ...offline,             // keep cx, cy, r, localNames etc.
+                                ...live,                // override with live prices
+                            };
+                        }
+                        return offline;                 // no live data → keep offline fallback
                     });
 
-                    let totalToday = cropPrices.reduce((sum, c) => sum + c.priceToday, 0);
-                    let totalPrev = cropPrices.reduce((sum, c) => sum + c.pricePrevWeek, 0);
-                    
-                    let avg = Math.round(totalToday / cropPrices.length);
-                    let avgP = Math.round(totalPrev / cropPrices.length);
-                    let trend = parseFloat((((avg - avgP) / avgP) * 100).toFixed(1));
+                    this.liveNationalStats = sumJson;
+                    this.payloadDate = distJson.date;
+                    this.serverLoading = false;
 
-                    let sorted = [...cropPrices].sort((a,b) => b.priceToday - a.priceToday);
-                    
-                    return {
-                        ...dist,
-                        computedAveragePrice: avg,
-                        computedAveragePricePrevWeek: avgP,
-                        trendPercent: trend,
-                        highestCropName: sorted[0]?.name || 'N/A',
-                        highestCropPrice: sorted[0]?.priceToday || 0,
-                        lowestCropName: sorted[sorted.length-1]?.name || 'N/A',
-                        lowestCropPrice: sorted[sorted.length-1]?.priceToday || 0
-                    };
-                });
+                    this.$nextTick(() => {
+                        if (window.lucide) lucide.createIcons();
+                    });
+
+                } catch (e) {
+                    console.error('[CeylonHeatmap] Fetch failed:', e);
+                    this.serverLoading = false;
+                    this.serverError = true;
+
+                    // Auto-activate offline fallback after error
+                    // so the UI is still usable
+                    this.offlineFallback = true;
+                    this.serverError = false;
+
+                    this.$nextTick(() => {
+                        if (window.lucide) lucide.createIcons();
+                    });
+                }
+            },
+
+            // ---------------------------------------------------------------
+            // COMPUTED GETTERS — driven by live or offline data
+            // ---------------------------------------------------------------
+
+            /**
+             * The active district list — always returns the full set of 12 districts.
+             * Live data is used when available; offline data as fallback.
+             */
+            get districtData() {
+                return (this.liveDistrictData.length > 0 && !this.offlineFallback)
+                    ? this.liveDistrictData
+                    : this.offlineDistrictData;
+            },
+
+            /**
+             * calculatedMetrics now just returns districtData directly.
+             * The backend already computed averages/trend; the frontend
+             * only does a light pass to ensure the shape is consistent.
+             */
+            get calculatedMetrics() {
+                return this.districtData.map(dist => ({
+                    ...dist,
+                    // Ensure numeric fields are present (guard against nulls from backend)
+                    computedAveragePrice:         dist.computedAveragePrice         ?? 0,
+                    computedAveragePricePrevWeek: dist.computedAveragePricePrevWeek ?? 0,
+                    trendPercent:                 dist.trendPercent                 ?? 0,
+                    highestCropName:              dist.highestCropName              ?? 'N/A',
+                    highestCropPrice:             dist.highestCropPrice             ?? 0,
+                    lowestCropName:               dist.lowestCropName               ?? 'N/A',
+                    lowestCropPrice:              dist.lowestCropPrice              ?? 0,
+                    primaryCrops:                 dist.primaryCrops                 ?? [],
+                }));
             },
 
             get bounds() {
-                const prices = this.calculatedMetrics.map(d => d.computedAveragePrice);
-                const min = Math.min(...prices);
-                const max = Math.max(...prices);
-                const range = max - min;
+                const prices = this.calculatedMetrics
+                    .map(d => d.computedAveragePrice)
+                    .filter(p => p > 0);
+                if (prices.length === 0) return { lowThreshold: 200, mediumThreshold: 350, highThreshold: 500 };
+                const min   = Math.min(...prices);
+                const max   = Math.max(...prices);
+                const range = max - min || 1;
                 return {
-                    lowThreshold: min + range * 0.25,
+                    lowThreshold:    min + range * 0.25,
                     mediumThreshold: min + range * 0.55,
-                    highThreshold: min + range * 0.80,
+                    highThreshold:   min + range * 0.80,
                 };
             },
 
             get nationalStats() {
+                // Prefer the API-computed summary when live data is loaded
+                if (this.liveNationalStats && !this.offlineFallback) {
+                    return {
+                        nationalAverage:   this.liveNationalStats.nationalAverage   ?? 0,
+                        expensiveDistrict: this.liveNationalStats.expensiveDistrict ?? 'N/A',
+                        expensivePrice:    this.liveNationalStats.expensivePrice    ?? 0,
+                        cheapestDistrict:  this.liveNationalStats.cheapestDistrict  ?? 'N/A',
+                        cheapestPrice:     this.liveNationalStats.cheapestPrice     ?? 0,
+                        distribution:      this.liveNationalStats.distribution      ?? { lowCount: 0, midCount: 0, highCount: 0 },
+                    };
+                }
+
+                // Offline / computed fallback
                 let metrics = this.calculatedMetrics;
-                if(!metrics.length) return { nationalAverage: 0, expensiveDistrict: '', cheapestDistrict: '', distribution: {} };
+                if (!metrics.length) return { nationalAverage: 0, expensiveDistrict: '', cheapestDistrict: '', distribution: {} };
 
                 let sum = 0, exp = metrics[0], chp = metrics[0];
-                let low = 0, mid = 0, high = 0, vhigh = 0;
+                let low = 0, mid = 0, high = 0;
                 let bnd = this.bounds;
 
                 metrics.forEach(d => {
                     sum += d.computedAveragePrice;
-                    if(d.computedAveragePrice > exp.computedAveragePrice) exp = d;
-                    if(d.computedAveragePrice < chp.computedAveragePrice) chp = d;
+                    if (d.computedAveragePrice > exp.computedAveragePrice) exp = d;
+                    if (d.computedAveragePrice < chp.computedAveragePrice) chp = d;
 
-                    if (d.computedAveragePrice <= bnd.lowThreshold) low++;
+                    if (d.computedAveragePrice <= bnd.lowThreshold)    low++;
                     else if (d.computedAveragePrice <= bnd.mediumThreshold) mid++;
-                    else if (d.computedAveragePrice <= bnd.highThreshold) high++;
-                    else vhigh++;
+                    else high++;
                 });
 
                 return {
-                    nationalAverage: Math.round(sum / metrics.length),
+                    nationalAverage:   Math.round(sum / metrics.length),
                     expensiveDistrict: exp.name,
-                    expensivePrice: exp.computedAveragePrice,
-                    cheapestDistrict: chp.name,
-                    cheapestPrice: chp.computedAveragePrice,
-                    distribution: { lowCount: low, midCount: mid, highCount: high }
+                    expensivePrice:    exp.computedAveragePrice,
+                    cheapestDistrict:  chp.name,
+                    cheapestPrice:     chp.computedAveragePrice,
+                    distribution:      { lowCount: low, midCount: mid, highCount: high },
                 };
+            },
+
+            get formattedPayloadDate() {
+                if (!this.payloadDate) return 'Offline Cache';
+                try {
+                    return new Date(this.payloadDate + 'T00:00:00').toLocaleDateString([], {
+                        day: 'numeric', month: 'short', year: 'numeric'
+                    });
+                } catch (e) {
+                    return this.payloadDate;
+                }
             },
 
             // Accessors for currently active UI elements
@@ -857,34 +924,33 @@
             },
 
             get hoveredDistrict() {
-                if(!this.hoveredDistrictId) return null;
+                if (!this.hoveredDistrictId) return null;
                 return this.calculatedMetrics.find(d => d.id === this.hoveredDistrictId);
-            },
-
-            get payloadDate() {
-                return this.allMarketsPayload?.date ? new Date(this.allMarketsPayload.date).toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' }) : '11 June 2026';
             },
 
             getFillColor(dist) {
                 if (this.displayMode === 'prices') {
-                    if (dist.computedAveragePrice <= this.bounds.lowThreshold) return '#10B981'; // Emerald
-                    if (dist.computedAveragePrice <= this.bounds.mediumThreshold) return '#FBBF24'; // Yellow
-                    if (dist.computedAveragePrice <= this.bounds.highThreshold) return '#FB923C'; // Orange
-                    return '#F43F5E'; // Red
+                    const p = dist.computedAveragePrice;
+                    if (p <= 0)                            return '#94A3B8'; // slate (no data)
+                    if (p <= this.bounds.lowThreshold)    return '#10B981'; // Emerald
+                    if (p <= this.bounds.mediumThreshold) return '#FBBF24'; // Yellow
+                    if (p <= this.bounds.highThreshold)   return '#FB923C'; // Orange
+                    return '#F43F5E';                                         // Red
                 } else {
-                    if (dist.role === 'Production') return '#059669'; 
-                    if (dist.role === 'Distribution') return '#2563EB'; 
-                    return '#E11D48'; 
+                    if (dist.role === 'Production')    return '#059669';
+                    if (dist.role === 'Distribution')  return '#2563EB';
+                    return '#E11D48';
                 }
             },
 
-            // Comparisons section properties
+            // Comparison section
             get compareA() { return this.calculatedMetrics.find(d => d.id === this.compareDistrictIdA) || this.calculatedMetrics[0]; },
             get compareB() { return this.calculatedMetrics.find(d => d.id === this.compareDistrictIdB) || this.calculatedMetrics[1]; },
-            
-            get compareGapAbs() { return Math.abs(this.compareA.computedAveragePrice - this.compareB.computedAveragePrice); },
-            get compareGapRatio() { return parseFloat(((this.compareGapAbs / this.compareB.computedAveragePrice) * 100).toFixed(1)); },
-            get compareGapIsACheaper() { return (this.compareA.computedAveragePrice - this.compareB.computedAveragePrice) < 0; }
+
+            get compareGapAbs()       { return Math.abs(this.compareA.computedAveragePrice - this.compareB.computedAveragePrice); },
+            get compareGapRatio()     { return this.compareB.computedAveragePrice > 0 ? parseFloat(((this.compareGapAbs / this.compareB.computedAveragePrice) * 100).toFixed(1)) : 0; },
+            get compareGapIsACheaper(){ return (this.compareA.computedAveragePrice - this.compareB.computedAveragePrice) < 0; },
         }));
     });
+
 </script>
