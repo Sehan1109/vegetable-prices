@@ -37,16 +37,40 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <button @click="$store.theme.toggle()" class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors relative w-5 h-5 flex items-center justify-center">
-                        <template x-if="$store.theme.darkMode">
-                            <i data-lucide="sun" class="w-5 h-5 absolute"></i>
-                        </template>
-                        <template x-if="!$store.theme.darkMode">
-                            <i data-lucide="moon" class="w-5 h-5 absolute"></i>
-                        </template>
+                    <button
+    @click="$store.theme.toggle()"
+    class="w-10 h-10 rounded-lg flex items-center justify-center
+           text-slate-600 hover:text-slate-900
+           dark:text-slate-400 dark:hover:text-white"
+>
+    <svg x-show="$store.theme.darkMode"
+         xmlns="http://www.w3.org/2000/svg"
+         width="20"
+         height="20"
+         viewBox="0 0 24 24"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="2">
+        <circle cx="12" cy="12" r="5"/>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>
+
+    <svg x-show="!$store.theme.darkMode"
+         xmlns="http://www.w3.org/2000/svg"
+         width="20"
+         height="20"
+         viewBox="0 0 24 24"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="2">
+        <path d="M12 3a9 9 0 1 0 9 9A7 7 0 0 1 12 3z"/>
+    </svg>
+</button>
+
+                    <button @click="setLang('en')"
+                        class="text-xs font-mono font-bold px-2.5 py-1 rounded-md border transition border-emerald-500/30 text-emerald-400 bg-emerald-950/30">
+                        EN
                     </button>
-                    <!-- Calls PriceApp's setLang correctly since it's removed from Dashboard -->
-                    <button @click="setLang('en')" class="text-xs font-mono font-bold px-2.5 py-1 rounded-md border transition border-emerald-500/30 text-emerald-400 bg-emerald-950/30">EN</button>
                 </div>
             </div>
         </div>
