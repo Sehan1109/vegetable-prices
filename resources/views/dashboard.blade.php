@@ -357,6 +357,30 @@
                 </div>
             </section>
 
+            <!-- Latest SEO Pages -->
+            @if(isset($latestSeoPages) && count($latestSeoPages) > 0)
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">Market Intelligence</p>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Latest Detailed Reports</h3>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($latestSeoPages as $seoPage)
+                    <a href="{{ url($seoPage->slug) }}" class="group block p-5 bg-white border border-slate-200 rounded-2xl hover:border-emerald-500 hover:shadow-lg transition dark:bg-slate-900/50 dark:border-slate-800">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded dark:bg-slate-800 dark:text-slate-400">{{ \Carbon\Carbon::parse($seoPage->date)->format('M d, Y') }}</span>
+                            <i data-lucide="external-link" class="w-4 h-4 text-slate-400 group-hover:text-emerald-500 transition"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 dark:text-white mb-1 group-hover:text-emerald-600 transition">{{ $seoPage->title }}</h4>
+                        <p class="text-sm text-slate-500 line-clamp-2">{{ $seoPage->meta_description }}</p>
+                    </a>
+                    @endforeach
+                </div>
+            </section>
+            @endif
+
         </div>
 
         <div x-show="activeTab === 'rates'" x-transition style="{{ ($initialTab ?? 'home') !== 'rates' ? 'display: none;' : '' }}">

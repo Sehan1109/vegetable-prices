@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PriceDashboardController;
+use App\Http\Controllers\SeoPageController;
 use Illuminate\Support\Facades\Route;
 
 // Main frontend view
@@ -11,6 +12,11 @@ Route::get('/trends', [PriceDashboardController::class, 'index'])->name('trends'
 Route::get('/heatmap', [PriceDashboardController::class, 'index'])->name('heatmap');
 Route::get('/about', [PriceDashboardController::class, 'index'])->name('about');
 Route::get('/pipeline', [PriceDashboardController::class, 'index'])->name('pipeline');
+
+// SEO static pages route (must be before specific APIs but after defined static ones)
+Route::get('/{slug}', [SeoPageController::class, 'show'])
+    ->where('slug', '^[0-9]{4}-[0-9]{2}-[0-9]{2}-.*-price-.*$')
+    ->name('seo.page.show');
 
 // Price API Endpoints
 Route::get('/api/prices/today', [PriceDashboardController::class, 'getPrices']);

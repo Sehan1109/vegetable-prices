@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PriceRecord;
+use App\Models\SeoPage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
@@ -38,10 +39,16 @@ class PriceDashboardController extends Controller
         elseif ($path == 'about') $activeTab = 'about';
         elseif ($path == 'pipeline') $activeTab = 'pipeline';
 
+        $latestSeoPages = SeoPage::with(['market', 'vegetable'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
         return view('dashboard', [
             'lang' => $lang,
             'todayPrices' => $todayPrices,
-            'initialTab' => $activeTab
+            'initialTab' => $activeTab,
+            'latestSeoPages' => $latestSeoPages
         ]);
     }
 
