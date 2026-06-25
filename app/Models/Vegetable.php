@@ -13,6 +13,8 @@ class Vegetable extends Model
         'name',
         'category',
         'slug',
+        'status',
+        'image',
     ];
 
     public function priceRecords()

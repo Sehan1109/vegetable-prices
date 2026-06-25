@@ -27,10 +27,8 @@ Route::get('/api/heatmap/districts', [\App\Http\Controllers\HeatmapController::c
 Route::get('/api/heatmap/summary', [\App\Http\Controllers\HeatmapController::class, 'summary']);
 Route::get('/api/heatmap/comparison', [\App\Http\Controllers\HeatmapController::class, 'comparison']);
 
-// Admin Dashboard
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Admin Routes
+require __DIR__.'/admin.php';
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

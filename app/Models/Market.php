@@ -14,6 +14,8 @@ class Market extends Model
         'district',
         'province',
         'slug',
+        'status',
+        'coordinates',
     ];
 
     public function priceRecords()
