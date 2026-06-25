@@ -14,15 +14,20 @@ class SeoPageGeneratorService
      */
     public function generateForPriceRecord(PriceRecord $priceRecord): ?SeoPage
     {
-        // Load relationships if not loaded
-        $priceRecord->loadMissing(['market', 'vegetable']);
+        $marketSlug = $priceRecord->market_id;
+        $vegetableSlug = $priceRecord->vegetable_id;
 
-        $market = $priceRecord->market;
-        $vegetable = $priceRecord->vegetable;
+        // Auto-create Market if it doesn't exist
+        $market = \App\Models\Market::firstOrCreate(
+            ['slug' => $marketSlug],
+            ['name' => Str::title(str_replace('-', ' ', $marketSlug))]
+        );
 
-        if (!$market || !$vegetable) {
-            return null; // Missing data, skip
-        }
+        // Auto-create Vegetable if it doesn't exist
+        $vegetable = \App\Models\Vegetable::firstOrCreate(
+            ['slug' => $vegetableSlug],
+            ['name' => Str::title(str_replace('-', ' ', $vegetableSlug))]
+        );
 
         $date = Carbon::parse($priceRecord->date);
         

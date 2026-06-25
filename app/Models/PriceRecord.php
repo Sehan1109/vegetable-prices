@@ -31,11 +31,11 @@ class PriceRecord extends Model
 
     public function market()
     {
-        return $this->belongsTo(Market::class);
+        return $this->belongsTo(Market::class, 'market_id', 'slug');
     }
 
     public function vegetable()
     {
-        return $this->belongsTo(Vegetable::class);
+        return $this->belongsTo(Vegetable::class, 'vegetable_id', 'slug');
     }
 }

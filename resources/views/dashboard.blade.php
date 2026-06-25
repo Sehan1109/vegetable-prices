@@ -419,12 +419,13 @@
                         </thead>
                         <tbody class="text-slate-700 dark:text-slate-300">
                             <template x-for="(marketData, vegId) in filteredPrices" :key="vegId">
-                                <tr class="border-b border-slate-200 hover:bg-slate-50/30 transition dark:border-slate-800 dark:hover:bg-slate-800/30">
-                                    <td class="p-4 font-semibold capitalize text-slate-900 dark:text-white" x-text="vegId"></td>
-                                    <td class="p-4 font-mono font-bold text-emerald-400" x-text="'Rs. ' + marketData.price"></td>
-                                    <td class="p-4 font-mono text-slate-500" x-text="'Rs. ' + marketData.priceYesterday"></td>
-                                    <td class="p-4 font-mono font-bold" :class="marketData.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'" x-text="(marketData.changePercent >= 0 ? '+' : '') + marketData.changePercent + '%'"></td>
-                                </tr>
+                                <tr @click="if(marketData.slug) { window.location.href = '/' + marketData.slug }" 
+            class="border-b border-slate-200 transition-all duration-300 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:shadow-sm hover:-translate-y-px">
+            <td class="p-4 font-semibold capitalize text-slate-900 dark:text-white" x-text="marketData.vegetable || vegId"></td>
+            <td class="p-4 font-mono font-bold text-emerald-400" x-text="'Rs. ' + (marketData.price_average || marketData.price)"></td>
+            <td class="p-4 font-mono text-slate-500" x-text="'Rs. ' + marketData.priceYesterday"></td>
+            <td class="p-4 font-mono font-bold" :class="marketData.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'" x-text="(marketData.changePercent >= 0 ? '+' : '') + marketData.changePercent + '%'"></td>
+        </tr>
                             </template>
                         </tbody>
                     </table>

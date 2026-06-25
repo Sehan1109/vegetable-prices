@@ -23,12 +23,12 @@
     <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
-      "@type": "Product",
+      "@@context": "https://schema.org",
+      "@@type": "Product",
       "name": "{{ $page->vegetable->name }}",
       "description": "Price of {{ $page->vegetable->name }} at {{ $page->market->name }} on {{ $page->date }}",
       "offers": {
-        "@type": "Offer",
+        "@@type": "Offer",
         "priceCurrency": "LKR",
         "price": "{{ $page->priceRecord->price_average ?? $page->priceRecord->price ?? 0 }}",
         "priceValidUntil": "{{ \Carbon\Carbon::parse($page->date)->addDay()->format('Y-m-d') }}",

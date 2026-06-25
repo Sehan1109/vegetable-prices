@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\PriceRecord;
 use App\Models\SeoPage;
 use Carbon\Carbon;
+use App\Http\Requests\GetPricesRequest;
+use App\Http\Resources\PriceRecordResource;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -56,7 +58,7 @@ class PriceDashboardController extends Controller
      * API: Get daily prices for a market
      * Node.js වල /api/prices/today එකට අදාල PHP එක
      */
-    public function getPrices(Request $request)
+    public function getPrices(GetPricesRequest $request)
     {
         $marketId = $request->query('marketId', 'peliyagoda');
         
@@ -68,21 +70,16 @@ class PriceDashboardController extends Controller
         if ($latestRecord) {
             $date = $latestRecord->date;
             
-            // ඒ දිනයට අදාල ඔක්කොම records ගන්නවා
-            $records = PriceRecord::where('date', $date)
+            // ඒ දිනයට අදාල ඔක්කොම records ගන්නවා (Avoid N+1 with eager loading)
+            $records = PriceRecord::with(['vegetable', 'market'])
+                ->where('date', $date)
                 ->where('market_id', $marketId)
                 ->get();
 
-            // Node.js වල වගේම client බලාපොරොත්තු වන Hashmap format එකට හදනවා
+            // Transform records into a hashmap using the new PriceRecordResource
             $pricesMap = [];
             foreach ($records as $r) {
-                $pricesMap[$r->vegetable_id] = [
-                    'price' => $r->price,
-                    'priceYesterday' => $r->price_yesterday,
-                    'changePercent' => $r->change_percent,
-                    'priceYearAgo' => $r->price_year_ago ?? 0, // Node.js එකේ තිබූ අගයන්
-                    'changePercentYear' => $r->change_percent_year ?? 0
-                ];
+                $pricesMap[$r->vegetable_id] = (new PriceRecordResource($r))->resolve();
             }
 
             return response()->json([
