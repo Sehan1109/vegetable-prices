@@ -23,6 +23,13 @@ class GenerateSitemapJob implements ShouldQueue
      */
     public function handle(SitemapGeneratorService $service): void
     {
-        $service->generate();
+        try {
+            \Illuminate\Support\Facades\Log::info("GenerateSitemapJob started.");
+            $service->generate();
+            \Illuminate\Support\Facades\Log::info("GenerateSitemapJob completed successfully.");
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("GenerateSitemapJob failed: " . $e->getMessage());
+            throw $e; // Re-throw to ensure the job is marked as failed in Laravel
+        }
     }
 }
