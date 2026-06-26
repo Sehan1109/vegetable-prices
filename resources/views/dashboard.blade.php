@@ -83,8 +83,8 @@
             <!-- Premium Hero Section -->
             <section class="relative w-full overflow-hidden bg-white dark:bg-slate-950 transition-colors duration-500">
                 <!-- Background Decorative Glows -->
-                <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 w-[600px] h-[600px] bg-emerald-50 rounded-full blur-3xl opacity-50"></div>
-                <div class="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-[400px] h-[400px] bg-slate-50 rounded-full blur-3xl opacity-50"></div>
+                <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 w-[600px] h-[600px] bg-emerald-50 dark:bg-emerald-900/20 rounded-full blur-3xl opacity-50"></div>
+                <div class="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-[400px] h-[400px] bg-slate-50 dark:bg-slate-800/30 rounded-full blur-3xl opacity-50"></div>
 
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -98,10 +98,10 @@
 
                             <div class="space-y-4">
                                 <h1 class="text-4xl lg:text-6xl font-black tracking-tight leading-[1.1]">
-                                    <span class="text-[#0F172A] block">Daily Vegetable</span>
+                                    <span class="text-slate-900 dark:text-white block">Daily Vegetable</span>
                                     <span class="text-[#10B981] block">Prices Across SL</span>
                                 </h1>
-                                <p class="text-slate-500 text-base md:text-lg leading-relaxed max-w-lg font-medium">
+                                <p class="text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed max-w-lg font-medium">
                                     Track fresh market prices, trends, and historical data updated daily. Compare rates between Peliyagoda, Dambulla, and other major national economic centers.
                                 </p>
                             </div>
@@ -111,7 +111,7 @@
                                     <span>View Today's Prices</span>
                                     <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
                                 </button>
-                                <button @click="activeTab = 'trends'" class="px-6 py-3.5 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 hover:border-slate-300">
+                                <button @click="activeTab = 'trends'" class="px-6 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600">
                                     Explore Trends
                                 </button>
                             </div>
@@ -123,11 +123,11 @@
                                         <i data-lucide="shield-check" class="w-6 h-6"></i>
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-bold text-slate-900" x-text="dataSource">HARTI Official Data Verified</h4>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white" x-text="dataSource">HARTI Official Data Verified</h4>
                                         <p class="text-xs text-emerald-600/70 font-mono mt-0.5">Extracted: <span x-text="pdfDate"></span></p>
                                     </div>
                                 </div>
-                                <a :href="pdfUrl" x-show="pdfUrl" target="_blank" class="p-2.5 rounded-xl bg-white border border-emerald-100 text-emerald-600 transition-all hover:bg-emerald-500 hover:text-white shadow-sm">
+                                <a :href="pdfUrl" x-show="pdfUrl" target="_blank" class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 transition-all hover:bg-emerald-500 dark:hover:bg-emerald-600 hover:text-white shadow-sm">
                                     <i data-lucide="file-text" class="w-4 h-4"></i>
                                 </a>
                             </div>
@@ -150,30 +150,30 @@
                             </div>
 
                             <!-- Main Dashboard Card -->
-                            <div class="w-full max-w-sm bg-white rounded-[2.5rem] p-2 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.12)] border border-slate-100 relative z-20 transition-all hover:scale-[1.01]">
-                                <div class="bg-slate-50 rounded-[2rem] p-5 space-y-4">
-                                    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                            <div class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-[2.5rem] p-2 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.12)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] border border-slate-100 dark:border-slate-700 relative z-20 transition-all hover:scale-[1.01]">
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-[2rem] p-5 space-y-4">
+                                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
                                         <div class="flex items-center gap-2">
                                             <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                            <span class="text-[10px] font-mono font-black uppercase text-slate-400 tracking-tighter">Live Market Feed</span>
+                                            <span class="text-[10px] font-mono font-black uppercase text-slate-400 dark:text-slate-500 tracking-tighter">Live Market Feed</span>
                                         </div>
-                                        <span class="text-[10px] font-bold text-slate-400 font-mono" x-text="selectedMarket === 'dambulla' ? 'Dambulla Econ Center' : (selectedMarket === 'peliyagoda' ? 'Peliyagoda Market' : selectedMarket.charAt(0).toUpperCase() + selectedMarket.slice(1))">Peliyagoda Market</span>
+                                        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 font-mono" x-text="selectedMarket === 'dambulla' ? 'Dambulla Econ Center' : (selectedMarket === 'peliyagoda' ? 'Peliyagoda Market' : selectedMarket.charAt(0).toUpperCase() + selectedMarket.slice(1))">Peliyagoda Market</span>
                                     </div>
 
                                     <div class="space-y-2">
                                         <!-- Row 1: Carrot -->
-                                        <div class="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                                        <div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+                                                <div class="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center">
                                                     <x-vegetable-illustration id="carrot" size="24" />
                                                 </div>
                                                 <div>
-                                                    <p class="text-xs font-bold text-slate-800">Carrot</p>
-                                                    <p class="text-[9px] text-slate-400 font-mono uppercase">Wholesale Grade</p>
+                                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100">Carrot</p>
+                                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 font-mono uppercase">Wholesale Grade</p>
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <p class="text-sm font-black text-slate-900 font-mono" x-text="prices.carrot ? 'Rs. ' + (prices.carrot.price_average ?? prices.carrot.price) : '—'">—</p>
+                                                <p class="text-sm font-black text-slate-900 dark:text-white font-mono" x-text="prices.carrot ? 'Rs. ' + (prices.carrot.price_average ?? prices.carrot.price) : '—'">—</p>
                                                 <span class="text-[9px] font-bold"
                                                     :class="prices.carrot?.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'"
                                                     x-text="prices.carrot ? (prices.carrot.changePercent > 0 ? '+' : '') + prices.carrot.changePercent + '%' : ''">—</span>
@@ -181,18 +181,18 @@
                                         </div>
 
                                         <!-- Row 2: Tomato -->
-                                        <div class="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                                        <div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center">
+                                                <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center">
                                                     <x-vegetable-illustration id="tomato" size="24" />
                                                 </div>
                                                 <div>
-                                                    <p class="text-xs font-bold text-slate-800">Tomato</p>
-                                                    <p class="text-[9px] text-slate-400 font-mono uppercase">LKR Spot Index</p>
+                                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100">Tomato</p>
+                                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 font-mono uppercase">LKR Spot Index</p>
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <p class="text-sm font-black text-slate-900 font-mono" x-text="prices.tomato ? 'Rs. ' + (prices.tomato.price_average ?? prices.tomato.price) : '—'">—</p>
+                                                <p class="text-sm font-black text-slate-900 dark:text-white font-mono" x-text="prices.tomato ? 'Rs. ' + (prices.tomato.price_average ?? prices.tomato.price) : '—'">—</p>
                                                 <span class="text-[9px] font-bold"
                                                     :class="prices.tomato?.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'"
                                                     x-text="prices.tomato ? (prices.tomato.changePercent > 0 ? '+' : '') + prices.tomato.changePercent + '%' : ''">—</span>
@@ -200,18 +200,18 @@
                                         </div>
 
                                         <!-- Row 3: Green Beans -->
-                                        <div class="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                                        <div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                                                <div class="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
                                                     <x-vegetable-illustration id="beans" size="24" />
                                                 </div>
                                                 <div>
-                                                    <p class="text-xs font-bold text-slate-800">Green Beans</p>
-                                                    <p class="text-[9px] text-slate-400 font-mono uppercase">Fresh Produce</p>
+                                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100">Green Beans</p>
+                                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 font-mono uppercase">Fresh Produce</p>
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <p class="text-sm font-black text-slate-900 font-mono" x-text="prices['green-beans'] ? 'Rs. ' + (prices['green-beans'].price_average ?? prices['green-beans'].price) : '—'">—</p>
+                                                <p class="text-sm font-black text-slate-900 dark:text-white font-mono" x-text="prices['green-beans'] ? 'Rs. ' + (prices['green-beans'].price_average ?? prices['green-beans'].price) : '—'">—</p>
                                                 <span class="text-[9px] font-bold"
                                                     :class="prices['green-beans']?.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'"
                                                     x-text="prices['green-beans'] ? (prices['green-beans'].changePercent > 0 ? '+' : '') + prices['green-beans'].changePercent + '%' : ''">—</span>
