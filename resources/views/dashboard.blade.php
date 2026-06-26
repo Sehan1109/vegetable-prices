@@ -157,11 +157,11 @@
                                             <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                                             <span class="text-[10px] font-mono font-black uppercase text-slate-400 tracking-tighter">Live Market Feed</span>
                                         </div>
-                                        <span class="text-[10px] font-bold text-slate-400 font-mono">Dambulla Econ Center</span>
+                                        <span class="text-[10px] font-bold text-slate-400 font-mono" x-text="selectedMarket === 'dambulla' ? 'Dambulla Econ Center' : (selectedMarket === 'peliyagoda' ? 'Peliyagoda Market' : selectedMarket.charAt(0).toUpperCase() + selectedMarket.slice(1))">Peliyagoda Market</span>
                                     </div>
 
                                     <div class="space-y-2">
-                                        <!-- Row 1 -->
+                                        <!-- Row 1: Carrot -->
                                         <div class="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
@@ -173,12 +173,14 @@
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <p class="text-sm font-black text-slate-900 font-mono">Rs. 320</p>
-                                                <span class="text-[9px] font-bold text-emerald-500">+4.2%</span>
+                                                <p class="text-sm font-black text-slate-900 font-mono" x-text="prices.carrot ? 'Rs. ' + (prices.carrot.price_average ?? prices.carrot.price) : '—'">—</p>
+                                                <span class="text-[9px] font-bold"
+                                                    :class="prices.carrot?.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'"
+                                                    x-text="prices.carrot ? (prices.carrot.changePercent > 0 ? '+' : '') + prices.carrot.changePercent + '%' : ''">—</span>
                                             </div>
                                         </div>
 
-                                        <!-- Row 2 -->
+                                        <!-- Row 2: Tomato -->
                                         <div class="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center">
@@ -190,25 +192,29 @@
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <p class="text-sm font-black text-slate-900 font-mono">Rs. 240</p>
-                                                <span class="text-[9px] font-bold text-rose-500">-2.1%</span>
+                                                <p class="text-sm font-black text-slate-900 font-mono" x-text="prices.tomato ? 'Rs. ' + (prices.tomato.price_average ?? prices.tomato.price) : '—'">—</p>
+                                                <span class="text-[9px] font-bold"
+                                                    :class="prices.tomato?.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'"
+                                                    x-text="prices.tomato ? (prices.tomato.changePercent > 0 ? '+' : '') + prices.tomato.changePercent + '%' : ''">—</span>
                                             </div>
                                         </div>
 
-                                        <!-- Row 3 -->
+                                        <!-- Row 3: Green Beans -->
                                         <div class="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                                                    <x-vegetable-illustration id="leeks" size="24" />
+                                                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                                                    <x-vegetable-illustration id="beans" size="24" />
                                                 </div>
                                                 <div>
-                                                    <p class="text-xs font-bold text-slate-800">Leeks</p>
-                                                    <p class="text-[9px] text-slate-400 font-mono uppercase">Highland Yield</p>
+                                                    <p class="text-xs font-bold text-slate-800">Green Beans</p>
+                                                    <p class="text-[9px] text-slate-400 font-mono uppercase">Fresh Produce</p>
                                                 </div>
                                             </div>
                                             <div class="text-right">
-                                                <p class="text-sm font-black text-slate-900 font-mono">Rs. 460</p>
-                                                <span class="text-[9px] font-bold text-emerald-500">+1.5%</span>
+                                                <p class="text-sm font-black text-slate-900 font-mono" x-text="prices['green-beans'] ? 'Rs. ' + (prices['green-beans'].price_average ?? prices['green-beans'].price) : '—'">—</p>
+                                                <span class="text-[9px] font-bold"
+                                                    :class="prices['green-beans']?.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'"
+                                                    x-text="prices['green-beans'] ? (prices['green-beans'].changePercent > 0 ? '+' : '') + prices['green-beans'].changePercent + '%' : ''">—</span>
                                             </div>
                                         </div>
                                     </div>
@@ -216,8 +222,8 @@
                                     <div class="pt-2">
                                         <div class="bg-emerald-600 rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-emerald-600/20">
                                             <div>
-                                                <p class="text-[9px] font-bold text-emerald-100 uppercase tracking-widest">National Avg</p>
-                                                <p class="text-lg font-black text-white font-mono mt-0.5">Rs. 340.20</p>
+                                                <p class="text-[9px] font-bold text-emerald-100 uppercase tracking-widest">Market Avg</p>
+                                                <p class="text-lg font-black text-white font-mono mt-0.5" x-text="heroNationalAvg ? 'Rs. ' + heroNationalAvg : '—'">—</p>
                                             </div>
                                             <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white">
                                                 <i data-lucide="trending-up" class="w-4 h-4"></i>
@@ -614,6 +620,13 @@
             key.toLowerCase().includes(query)
         )
     );
+},
+
+            get heroNationalAvg() {
+    const entries = Object.values(this.prices || {});
+    if (!entries.length) return null;
+    const sum = entries.reduce((acc, v) => acc + parseFloat(v.price_average ?? v.price ?? 0), 0);
+    return (sum / entries.length).toFixed(2);
 },
 
             fetchTodayPrices() {
