@@ -433,11 +433,20 @@ class ScrapeHartiPrices extends Command
     private function saveToDatabase(array $rows): int
     {
         $count = 0;
+        $generator = app(\App\Services\SeoPageGeneratorService::class);
+
         foreach ($rows as $row) {
-            PriceRecord::updateOrCreate(
+            $priceRecord = PriceRecord::updateOrCreate(
                 ['date' => $row['date'], 'market_id' => $row['market_id'], 'vegetable_id' => $row['vegetable_id']],
                 ['price' => $row['price'], 'price_yesterday' => $row['price_yesterday'], 'change_percent' => $row['change_percent'], 'trend' => $row['trend']]
             );
+
+            try {
+                $generator->generateForPriceRecord($priceRecord);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to generate SEO page for {$row['vegetable_id']} in {$row['market_id']} on {$row['date']}: " . $e->getMessage());
+            }
+
             $count++;
         }
         return $count;

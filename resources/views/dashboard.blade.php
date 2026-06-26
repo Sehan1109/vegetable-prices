@@ -357,7 +357,7 @@
                 </div>
             </section>
 
-            <!-- Latest SEO Pages -->
+            <!-- Latest SEO Pages
             @if(isset($latestSeoPages) && count($latestSeoPages) > 0)
             <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
                 <div class="mb-6 flex justify-between items-end">
@@ -379,7 +379,7 @@
                     @endforeach
                 </div>
             </section>
-            @endif
+            @endif -->
 
         </div>
 
