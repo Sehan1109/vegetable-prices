@@ -2,37 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://localhost/</loc>
-    <lastmod>2026-06-25T03:39:18+00:00</lastmod>
+    <lastmod>2026-06-26T11:39:54+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>http://localhost/prices</loc>
-    <lastmod>2026-06-25T03:39:18+00:00</lastmod>
+    <lastmod>2026-06-26T11:39:54+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>http://localhost/trends</loc>
-    <lastmod>2026-06-25T03:39:18+00:00</lastmod>
+    <lastmod>2026-06-26T11:39:54+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>http://localhost/heatmap</loc>
-    <lastmod>2026-06-25T03:39:18+00:00</lastmod>
+    <lastmod>2026-06-26T11:39:54+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>http://localhost/about</loc>
-    <lastmod>2026-06-25T03:39:18+00:00</lastmod>
+    <lastmod>2026-06-26T11:39:54+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>http://localhost/pipeline</loc>
-    <lastmod>2026-06-25T03:39:18+00:00</lastmod>
+    <lastmod>2026-06-26T11:39:54+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -45,6 +45,36 @@
   <url>
     <loc>http://localhost/2026-06-24-ash-plantain-price-peliyagoda</loc>
     <lastmod>2026-06-25T02:25:33+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/2026-06-24-beetroot-price-peliyagoda</loc>
+    <lastmod>2026-06-25T03:49:29+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/2026-06-24-green-chilli-price-peliyagoda</loc>
+    <lastmod>2026-06-25T03:58:25+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/2026-06-24-long-beans-price-peliyagoda</loc>
+    <lastmod>2026-06-25T03:58:32+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/2026-06-24-tomato-price-peliyagoda</loc>
+    <lastmod>2026-06-25T03:58:45+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>http://localhost/2026-06-26-carrot-price-peliyagoda</loc>
+    <lastmod>2026-06-26T11:17:06+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -63,6 +93,36 @@
   <url>
     <loc>http://localhost/vegetables/ash-plantain</loc>
     <lastmod>2026-06-25T02:21:43+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>http://localhost/vegetables/beetroot</loc>
+    <lastmod>2026-06-25T03:49:29+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>http://localhost/vegetables/green-chilli</loc>
+    <lastmod>2026-06-25T03:58:25+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>http://localhost/vegetables/long-beans</loc>
+    <lastmod>2026-06-25T03:58:32+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>http://localhost/vegetables/tomato</loc>
+    <lastmod>2026-06-25T03:58:45+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>http://localhost/vegetables/carrot</loc>
+    <lastmod>2026-06-26T11:17:06+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -349,7 +349,7 @@ class DashboardController extends Controller
     public function analytics()
     {
         // Daily imports (last 30 days)
-        $dailyImports = PriceRecord::selectRaw("date::text as label, COUNT(*) as total")
+        $dailyImports = PriceRecord::selectRaw("date as label, COUNT(*) as total")
             ->where('date', '>=', Carbon::now()->subDays(30)->toDateString())
             ->groupBy('date')
             ->orderBy('date')
