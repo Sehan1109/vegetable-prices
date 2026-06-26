@@ -21,13 +21,13 @@ class ScraperController extends Controller
             $output = Artisan::output();
             
             if ($exitCode === 0) {
-                return redirect()->route('dashboard')->with('success', 'Scraper completed successfully!')->with('scrape_output', $output);
+                return redirect()->route('admin.dashboard')->with('success', 'Scraper completed successfully!')->with('scrape_output', $output);
             } else {
-                return redirect()->route('dashboard')->with('error', 'Scraper failed. Check the logs for more details.')->with('scrape_output', $output);
+                return redirect()->route('admin.dashboard')->with('error', 'Scraper failed. Check the logs for more details.')->with('scrape_output', $output);
             }
         } catch (\Exception $e) {
             Log::error('Manual Scrape Failed: ' . $e->getMessage());
-            return redirect()->route('dashboard')->with('error', 'An unexpected error occurred: ' . $e->getMessage());
+            return redirect()->route('admin.dashboard')->with('error', 'An unexpected error occurred: ' . $e->getMessage());
         }
     }
 }

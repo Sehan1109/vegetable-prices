@@ -123,7 +123,7 @@
                                         <i data-lucide="shield-check" class="w-6 h-6"></i>
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-bold text-slate-900">HARTI Official Data Verified</h4>
+                                        <h4 class="text-sm font-bold text-slate-900" x-text="dataSource">HARTI Official Data Verified</h4>
                                         <p class="text-xs text-emerald-600/70 font-mono mt-0.5">Extracted: <span x-text="pdfDate"></span></p>
                                     </div>
                                 </div>
@@ -521,6 +521,7 @@
             trendVeg: 'carrot',
             pdfDate: '',
             pdfUrl: '',
+            dataSource: 'HARTI Official Data Verified',
             chartInstance: null,
 
             navItems: [
@@ -626,6 +627,7 @@
                         this.prices = data?.prices || {};
                         this.pdfDate = data?.scrapedPdfDate || '';
                         this.pdfUrl = data?.scrapedPdfUrl || '';
+                        this.dataSource = (this.pdfUrl && this.pdfUrl.toLowerCase().includes('cbsl')) ? 'CBSL Official Data Verified' : 'HARTI Official Data Verified';
                         this.loading = false;
                         this.$nextTick(() => { if(window.lucide) { lucide.createIcons(); } });
                     })
