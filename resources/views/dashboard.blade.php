@@ -447,10 +447,9 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1" x-text="'Active Chart Vector: ' + trendVeg.toUpperCase()"></p>
                     </div>
                     <select x-model="trendVeg" @change="fetchTrendHistory()" class="bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-800 text-sm rounded-xl p-2 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                        <option value="carrot">Carrot</option>
-                        <option value="tomato">Tomato</option>
-                        <option value="leeks">Leeks</option>
-                        <option value="beans">Beans</option>
+                        <template x-for="vegId in Object.keys(prices)" :key="vegId">
+                            <option :value="vegId" x-text="(prices[vegId]?.vegetable || vegId).split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')"></option>
+                        </template>
                     </select>
                 </div>
                 
@@ -473,9 +472,198 @@
         </div>
 
         <div x-show="activeTab === 'about'" x-transition style="{{ ($initialTab ?? 'home') !== 'about' ? 'display: none;' : '' }}">
-            <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-6">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">About the Open Pricing Platform</h2>
-                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">This terminal tracks macro-economic food pricing indices scraped from direct agricultural central market gates. Verified metrics assist in avoiding price exploitation by middle-tier wholesale distribution pools.</p>
+            <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
+
+                {{-- Hero Banner --}}
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-800 p-10 shadow-2xl shadow-emerald-900/30">
+                    <div class="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -translate-y-20 translate-x-20"></div>
+                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-y-20 -translate-x-16"></div>
+                    <div class="relative z-10">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6">
+                            <i data-lucide="leaf" class="w-3.5 h-3.5 text-emerald-200"></i>
+                            <span class="text-emerald-100 font-mono font-bold tracking-widest text-[10px] uppercase">Open Market Data Initiative · Sri Lanka</span>
+                        </div>
+                        <h2 class="text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight mb-4">
+                            Lanka Produce Prices<br>
+                            <span class="text-emerald-200">Ceylon Markets</span>
+                        </h2>
+                        <p class="text-emerald-100/80 text-sm leading-relaxed max-w-2xl">
+                            A free, open-access platform that publishes daily wholesale vegetable price indices across Sri Lanka's major trade hubs — empowering farmers, vendors, and households to make informed buying decisions without relying on intermediaries.
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Mission & Purpose --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                <i data-lucide="target" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Our Mission</h3>
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            Sri Lanka's vegetable supply chain suffers from severe information asymmetry — farmers sell low, consumers buy high, and middlemen capture the margin. This platform eliminates that gap by publishing raw wholesale rates the moment they are released by official government bodies, giving everyone equal access to market intelligence.
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-500">
+                                <i data-lucide="users" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Who Is This For?</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                            <li class="flex items-start gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"></i><span><strong class="text-slate-800 dark:text-slate-200">Households</strong> — compare retail vs wholesale rates before your weekly market visit.</span></li>
+                            <li class="flex items-start gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"></i><span><strong class="text-slate-800 dark:text-slate-200">Vendors & Retailers</strong> — benchmark your buying cost against national trade hubs.</span></li>
+                            <li class="flex items-start gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"></i><span><strong class="text-slate-800 dark:text-slate-200">Farmers</strong> — track demand trends and price peaks to plan harvest dispatch timing.</span></li>
+                            <li class="flex items-start gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0"></i><span><strong class="text-slate-800 dark:text-slate-200">Researchers & Policy Makers</strong> — access historical datasets for economic analysis.</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                {{-- Data Sources --}}
+                <div>
+                    <div class="mb-6">
+                        <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-1">Verified Data Pipeline</p>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Where Does the Data Come From?</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 dark:text-white text-sm">HARTI — Hector Kobbekaduwa Agrarian Research and Training Institute</h4>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                HARTI publishes official daily market price bulletins as PDF documents covering all major economic centres including Peliyagoda, Dambulla, Kandy, Meegoda, and Nuwara-Eliya. Our automated pipeline fetches, parses, and indexes these PDFs every day as soon as they are released.
+                            </p>
+                            <a href="https://www.harti.gov.lk" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-amber-500 hover:underline">
+                                Visit HARTI Website <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                                    <i data-lucide="landmark" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 dark:text-white text-sm">CBSL — Central Bank of Sri Lanka</h4>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                The Central Bank of Sri Lanka publishes supplementary consumer price and food inflation indices. These are cross-referenced to validate HARTI market data and provide broader macroeconomic context for observed price movements.
+                            </p>
+                            <a href="https://www.cbsl.gov.lk" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-blue-500 hover:underline">
+                                Visit CBSL Website <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Markets Covered --}}
+                <div>
+                    <div class="mb-6">
+                        <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-1">Geographic Coverage</p>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Markets Covered</h3>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        @foreach([
+                            ['Peliyagoda Manning Market', 'Western Province', 'amber'],
+                            ['Dambulla Economic Centre', 'North Central Province', 'emerald'],
+                            ['Kandy Market', 'Central Province', 'violet'],
+                            ['Meegoda Economic Centre', 'Western Province', 'cyan'],
+                            ['Norochchole Economic Centre', 'North Western Province', 'rose'],
+                            ['Thambuththegama', 'North Central Province', 'orange'],
+                            ['Keppetipola', 'Uva Province', 'teal'],
+                            ['Nuwara-Eliya Market', 'Central Highlands', 'sky'],
+                            ['Bandarawela Market', 'Uva Province', 'indigo'],
+                            ['Veyangoda Economic Centre', 'Gampaha District', 'lime'],
+                        ] as [$market, $region, $color])
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex flex-col gap-1">
+                            <span class="text-[10px] font-mono font-bold text-{{ $color }}-400 uppercase">{{ $region }}</span>
+                            <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-snug">{{ $market }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Key Features --}}
+                <div>
+                    <div class="mb-6">
+                        <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-1">Platform Capabilities</p>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Key Features</h3>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach([
+                            ['trending-up', 'emerald', 'Daily Price Feed', 'Fresh wholesale prices updated every day from official HARTI PDF bulletins — no manual entry, fully automated.'],
+                            ['bar-chart-2', 'violet', 'Trend Analysis', 'Interactive 7, 30, and 90-day historical price charts for every vegetable, highlighting seasonal cycles and price peaks.'],
+                            ['git-compare', 'amber', 'Market Comparison', 'Compare prices across Peliyagoda, Dambulla, Kandy, and all other major hubs side-by-side in real time.'],
+                            ['shield-check', 'teal', 'Verified Sources', 'All data originates from official government publications — HARTI & CBSL — with direct links to source PDFs.'],
+                            ['map-pin', 'rose', 'Geo Distribution', 'Understanding which regions supply which vegetables, from up-country cold crops to low-country dry zone produce.'],
+                            ['moon', 'blue', 'Dark Mode & Trilingual UI', 'Full dark mode support. Interface available in English, Sinhala (සිංහල), and Tamil (தமிழ்).'],
+                        ] as [$icon, $color, $title, $desc])
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-{{ $color }}-500/10 flex items-center justify-center text-{{ $color }}-500">
+                                <i data-lucide="{{ $icon }}" class="w-5 h-5"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-900 dark:text-white text-sm">{{ $title }}</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{{ $desc }}</p>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- How the Pipeline Works --}}
+                <div>
+                    <div class="mb-6">
+                        <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-1">Under the Hood</p>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">How the Data Pipeline Works</h3>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+                        @foreach([
+                            ['1', 'Download', 'file-down', 'emerald', 'An automated scraper checks the HARTI and CBSL websites daily for new PDF bulletins. When a new file is detected, it is downloaded immediately.'],
+                            ['2', 'Parse & Extract', 'cpu', 'amber', 'The PDF is processed using an intelligent text extraction engine that identifies vegetable names, market locations, and price columns — normalising variations in naming and format.'],
+                            ['3', 'Normalise & Store', 'database', 'violet', 'Extracted records are matched against a canonical vegetable index (handling Sinhala, Tamil, and English names) and stored in the database with full audit timestamps.'],
+                            ['4', 'Serve via API', 'zap', 'teal', 'Clean REST API endpoints expose today\'s prices, historical trends, and per-market breakdowns. The dashboard consumes these endpoints in real time via Alpine.js.'],
+                        ] as [$step, $label, $icon, $color, $desc])
+                        <div class="flex items-start gap-5 p-5 @if(!$loop->last) border-b border-slate-100 dark:border-slate-800 @endif">
+                            <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-{{ $color }}-500/10 flex items-center justify-center text-{{ $color }}-500">
+                                <i data-lucide="{{ $icon }}" class="w-4 h-4"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-[10px] font-mono font-bold text-{{ $color }}-400 bg-{{ $color }}-400/10 px-1.5 py-0.5 rounded uppercase">Step {{ $step }}</span>
+                                    <span class="font-bold text-slate-900 dark:text-white text-sm">{{ $label }}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{{ $desc }}</p>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Quick Links --}}
+                <div class="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                    <div>
+                        <h4 class="font-bold text-slate-900 dark:text-white mb-1">Ready to explore the data?</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Start with today's live market prices or dive into historical trends.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3 shrink-0">
+                        <button @click="activeTab = 'rates'"
+                            class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i> View Live Prices
+                        </button>
+                        <button @click="activeTab = 'trends'"
+                            class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2">
+                            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Explore Trends
+                        </button>
+                    </div>
+                </div>
+
             </section>
         </div>
 
@@ -642,6 +830,11 @@
                         this.pdfUrl = data?.scrapedPdfUrl || '';
                         this.dataSource = (this.pdfUrl && this.pdfUrl.toLowerCase().includes('cbsl')) ? 'CBSL Official Data Verified' : 'HARTI Official Data Verified';
                         this.loading = false;
+                        // Default trendVeg to first available vegetable if current selection not in prices
+                        const vegKeys = Object.keys(this.prices);
+                        if (vegKeys.length && !this.prices[this.trendVeg]) {
+                            this.trendVeg = vegKeys[0];
+                        }
                         this.$nextTick(() => { if(window.lucide) { lucide.createIcons(); } });
                     })
                     .catch(err => {
