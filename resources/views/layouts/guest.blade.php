@@ -83,7 +83,7 @@
         </div>
 
         <!-- Top Nav Bar -->
-        <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4">
+        <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
             <!-- Logo -->
             <a href="/" class="flex items-center gap-3 group">
                 <div class="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-300">
@@ -113,12 +113,12 @@
         </nav>
 
         <!-- Page Content -->
-        <div class="min-h-screen flex items-center justify-center px-4 pt-20 pb-8">
+        <div class="min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-16">
             {{ $slot }}
         </div>
 
         <!-- Footer -->
-        <div class="fixed bottom-0 left-0 right-0 flex items-center justify-center pb-4">
+        <div class="flex items-center justify-center pb-4">
             <p class="text-[10px] font-mono text-slate-400 dark:text-slate-600 tracking-widest uppercase">
                 © {{ date('Y') }} Lanka Produce Prices · HARTI Data Initiative
             </p>

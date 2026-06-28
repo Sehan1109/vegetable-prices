@@ -5,12 +5,12 @@
 
         {{-- Control Panel --}}
         <div class="bg-[#111827] border border-gray-800 rounded-xl shadow-2xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div class="flex items-center space-x-3">
                     <div class="w-2 h-2 rounded-full {{ isset($pipelineInfo['pipelineHealth']) && $pipelineInfo['pipelineHealth'] === 'healthy' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-gray-500' }}"></div>
                     <h2 class="text-lg font-bold text-white">Scraper Control Panel</h2>
                 </div>
-                <span class="text-xs text-gray-500">Last successful scrape: <span class="text-gray-300">{{ $lastScrapeDate ?? 'Never' }}</span></span>
+                <span class="text-xs text-gray-500 pl-5 sm:pl-0">Last successful scrape: <span class="text-gray-300">{{ $lastScrapeDate ?? 'Never' }}</span></span>
             </div>
 
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -31,9 +31,9 @@
                 <div class="bg-[#0a101d] border border-gray-800 rounded-lg p-5">
                     <h3 class="font-semibold text-white mb-1">Scrape Specific Date</h3>
                     <p class="text-xs text-gray-500 mb-4">Fetch price data for a particular date (useful for backfilling missed days).</p>
-                    <form action="{{ route('admin.scraper.run') }}" method="POST" class="flex gap-2">
+                    <form action="{{ route('admin.scraper.run') }}" method="POST" class="flex flex-wrap gap-2">
                         @csrf
-                        <input type="date" name="date" value="{{ date('Y-m-d') }}" class="border border-gray-700 rounded-md py-2 px-3 bg-[#111827] text-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                        <input type="date" name="date" value="{{ date('Y-m-d') }}" class="border border-gray-700 rounded-md py-2 px-3 bg-[#111827] text-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500 w-full sm:w-auto">
                         <button type="submit" class="px-4 py-2 bg-[#1f2937] hover:bg-[#374151] text-white text-sm font-medium rounded-md border border-gray-700 transition-colors">
                             <i data-lucide="calendar" class="w-4 h-4"></i>
                         </button>

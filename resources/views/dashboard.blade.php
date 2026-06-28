@@ -8,19 +8,20 @@
      class="w-full relative min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans text-slate-900 dark:text-slate-100">
     
     <nav class="sticky top-0 z-50 transition-all duration-300 w-full" 
-         :class="scrolled ? 'bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-lg dark:bg-slate-900/90 dark:border-slate-800' : 'bg-transparent'">
+         :class="scrolled ? 'bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-lg dark:bg-slate-900/90 dark:border-slate-800' : 'bg-transparent'"
+         x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
+            <div class="flex items-center justify-between h-16 sm:h-20">
                 
                 <div class="flex items-center gap-3 cursor-pointer select-none group" @click="handleLogoClick()">
-                    <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-all duration-300 shadow-md shadow-emerald-500/20">
-                        <svg class="w-6 h-6 text-slate-900 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-500 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-all duration-300 shadow-md shadow-emerald-500/20 shrink-0">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-slate-900 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white transition-colors">Lanka Produce Prices</span>
-                        <span class="text-[9px] uppercase tracking-widest text-emerald-400 font-mono font-bold leading-none -mt-0.5">Ceylon Markets</span>
+                        <span class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white transition-colors leading-none">Lanka Produce Prices</span>
+                        <span class="text-[9px] uppercase tracking-widest text-emerald-400 font-mono font-bold leading-none mt-0.5">Ceylon Markets</span>
                     </div>
                 </div>
 
@@ -36,10 +37,10 @@
                     </template>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 sm:gap-4">
                     <button
                         @click="$store.theme.toggle()"
-                        class="w-10 h-10 rounded-lg flex items-center justify-center
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center
                             text-slate-600 hover:text-slate-900
                             dark:text-slate-400 dark:hover:text-white"
                     >
@@ -68,9 +69,46 @@
                     </button>
 
                     <button @click="setLang('en')"
-                        class="text-xs font-mono font-bold px-2.5 py-1 rounded-md border transition border-emerald-500/30 text-emerald-400 bg-emerald-950/30">
+                        class="hidden sm:inline-flex text-xs font-mono font-bold px-2.5 py-1 rounded-md border transition border-emerald-500/30 text-emerald-400 bg-emerald-950/30">
                         EN
                     </button>
+
+                    <!-- Mobile hamburger -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen"
+                        class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
+                        aria-label="Toggle menu">
+                        <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div x-show="mobileMenuOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             class="lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 shadow-xl"
+             @click.away="mobileMenuOpen = false">
+            <div class="max-w-7xl mx-auto px-4 py-4 space-y-1">
+                <template x-for="item in navItems" :key="item.id">
+                    <button
+                        @click="activeTab = item.id; mobileMenuOpen = false"
+                        class="w-full text-left px-4 py-3 rounded-xl text-sm font-mono font-bold tracking-wide uppercase transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800"
+                        :class="activeTab === item.id ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40' : ''"
+                        x-text="item.label">
+                    </button>
+                </template>
+                <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center gap-3 px-4">
+                    <button @click="setLang('en')" class="text-xs font-mono font-bold px-2.5 py-1 rounded-md border transition border-emerald-500/30 text-emerald-400 bg-emerald-950/30">EN</button>
                 </div>
             </div>
         </div>
@@ -78,16 +116,16 @@
 
     <main class="w-full relative z-10 flex-1">
         
-        <div x-show="activeTab === 'home'" x-transition:enter="transition ease-out duration-300" class="space-y-24" style="{{ ($initialTab ?? 'home') !== 'home' ? 'display: none;' : '' }}">
+        <div x-show="activeTab === 'home'" x-transition:enter="transition ease-out duration-300" class="space-y-12 sm:space-y-24" style="{{ ($initialTab ?? 'home') !== 'home' ? 'display: none;' : '' }}">
             
             <!-- Premium Hero Section -->
             <section class="relative w-full overflow-hidden bg-white dark:bg-slate-950 transition-colors duration-500">
                 <!-- Background Decorative Glows -->
-                <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 w-[600px] h-[600px] bg-emerald-50 dark:bg-emerald-900/20 rounded-full blur-3xl opacity-50"></div>
-                <div class="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-[400px] h-[400px] bg-slate-50 dark:bg-slate-800/30 rounded-full blur-3xl opacity-50"></div>
+                <div class="absolute top-0 right-0 -translate-y-12 translate-x-12 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-emerald-50 dark:bg-emerald-900/20 rounded-full blur-3xl opacity-50"></div>
+                <div class="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-slate-50 dark:bg-slate-800/30 rounded-full blur-3xl opacity-50"></div>
 
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-20">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                         
                         <!-- Left Column: Content -->
                         <div class="space-y-8 relative z-10">
@@ -134,18 +172,18 @@
                         </div>
 
                         <!-- Right Column: Visual Dashboard -->
-                        <div class="relative flex justify-center items-center">
-                            <!-- Floating Background Icons -->
-                            <div class="absolute -top-12 -left-12 animate-[bounce_4s_ease-in-out_infinite] delay-700">
+                        <div class="relative flex justify-center items-center overflow-hidden sm:overflow-visible">
+                            <!-- Floating Background Icons (hidden on very small screens to prevent overflow) -->
+                            <div class="hidden sm:block absolute -top-12 -left-12 animate-[bounce_4s_ease-in-out_infinite] delay-700">
                                 <x-vegetable-illustration id="carrot" size="80" class="opacity-80 drop-shadow-xl" />
                             </div>
-                            <div class="absolute top-1/2 -right-8 animate-[bounce_5s_ease-in-out_infinite]">
+                            <div class="hidden sm:block absolute top-1/2 -right-8 animate-[bounce_5s_ease-in-out_infinite]">
                                 <x-vegetable-illustration id="tomato" size="70" class="opacity-70 drop-shadow-xl" />
                             </div>
-                            <div class="absolute -bottom-10 left-10 animate-[bounce_6s_ease-in-out_infinite] delay-1000">
+                            <div class="hidden sm:block absolute -bottom-10 left-10 animate-[bounce_6s_ease-in-out_infinite] delay-1000">
                                 <x-vegetable-illustration id="leeks" size="90" class="opacity-60 drop-shadow-xl" />
                             </div>
-                            <div class="absolute -bottom-4 right-1/4 animate-[bounce_3.5s_ease-in-out_infinite] delay-300">
+                            <div class="hidden sm:block absolute -bottom-4 right-1/4 animate-[bounce_3.5s_ease-in-out_infinite] delay-300">
                                 <x-vegetable-illustration id="brinjal" size="60" class="opacity-70 drop-shadow-xl" />
                             </div>
 
@@ -245,7 +283,7 @@
                     <p class="text-slate-600 dark:text-slate-400 text-sm max-w-2xl">Our purpose is to empower standard householders, vendors, and farmers with direct, simplified market values to bypass trading intermediaries.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <div @click="activeTab = 'rates'" class="bg-white border border-slate-200 hover:border-emerald-500/30 p-6 rounded-2xl transition cursor-pointer group dark:bg-slate-900/40 dark:border-slate-800/80">
                         <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-emerald-500 group-hover:text-slate-950 transition mb-4 font-mono font-bold text-xs dark:bg-slate-800 dark:text-slate-400">1</div>
                         <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-2">Check Daily Rates</h4>
@@ -390,15 +428,15 @@
         </div>
 
         <div x-show="activeTab === 'rates'" x-transition style="{{ ($initialTab ?? 'home') !== 'rates' ? 'display: none;' : '' }}">
-            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+                <div class="flex flex-col gap-4 mb-6">
                     <div>
-                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Live Market Rates Today</h2>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Live Market Rates Today</h2>
                         <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-mono">Real-time data feed from national open indices.</p>
                     </div>
-                    <div class="flex flex-wrap gap-3">
-                        <input type="text" x-model="searchQuery" placeholder="Filter commodities..." class="bg-white border border-slate-200 text-sm rounded-xl px-4 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900 dark:bg-slate-900 dark:border-slate-800 dark:text-white w-52">
-                        <select x-model="selectedMarket" @change="fetchTodayPrices()" class="bg-white border border-slate-200 text-xs rounded-xl p-2.5 text-slate-900 focus:outline-none dark:bg-slate-900 dark:border-slate-800 dark:text-white">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" x-model="searchQuery" placeholder="Filter commodities..." class="bg-white border border-slate-200 text-sm rounded-xl px-4 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-900 dark:bg-slate-900 dark:border-slate-800 dark:text-white w-full sm:w-52">
+                        <select x-model="selectedMarket" @change="fetchTodayPrices()" class="bg-white border border-slate-200 text-xs rounded-xl p-2.5 text-slate-900 focus:outline-none dark:bg-slate-900 dark:border-slate-800 dark:text-white w-full sm:w-auto">
                             <option value="peliyagoda">Peliyagoda Manning Market</option>
                             <option value="dambulla">Dambulla Economic Centre</option>
                             <option value="kandy">Kandy Market</option>
@@ -414,39 +452,41 @@
                 </div>
 
                 <div class="bg-white border border-slate-200 shadow-xl rounded-2xl overflow-hidden dark:bg-slate-900 dark:border-slate-800">
-                    <table class="w-full text-left border-collapse text-sm">
+                    <div class="overflow-x-auto">
+                    <table class="w-full min-w-[480px] text-left border-collapse text-sm">
                         <thead class="bg-slate-50 dark:bg-slate-950 font-mono text-xs text-slate-600 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-800">
                             <tr>
-                                <th class="p-4">Vegetable Commodity</th>
-                                <th class="p-4">Current Price</th>
-                                <th class="p-4">Yesterday's Price</th>
-                                <th class="p-4">Daily Change</th>
+                                <th class="p-3 sm:p-4">Vegetable</th>
+                                <th class="p-3 sm:p-4">Current Price</th>
+                                <th class="p-3 sm:p-4 hidden sm:table-cell">Yesterday's Price</th>
+                                <th class="p-3 sm:p-4">Daily Change</th>
                             </tr>
                         </thead>
                         <tbody class="text-slate-700 dark:text-slate-300">
                             <template x-for="(marketData, vegId) in filteredPrices" :key="vegId">
                                 <tr @click="if(marketData.slug) { window.location.href = '/' + marketData.slug }" 
             class="border-b border-slate-200 transition-all duration-300 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:shadow-sm hover:-translate-y-px">
-            <td class="p-4 font-semibold capitalize text-slate-900 dark:text-white" x-text="marketData.vegetable || vegId"></td>
-            <td class="p-4 font-mono font-bold text-emerald-400" x-text="'Rs. ' + (marketData.price_average || marketData.price)"></td>
-            <td class="p-4 font-mono text-slate-500" x-text="'Rs. ' + marketData.priceYesterday"></td>
-            <td class="p-4 font-mono font-bold" :class="marketData.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'" x-text="(marketData.changePercent >= 0 ? '+' : '') + marketData.changePercent + '%'"></td>
+            <td class="p-3 sm:p-4 font-semibold capitalize text-slate-900 dark:text-white" x-text="marketData.vegetable || vegId"></td>
+            <td class="p-3 sm:p-4 font-mono font-bold text-emerald-400" x-text="'Rs. ' + (marketData.price_average || marketData.price)"></td>
+            <td class="p-3 sm:p-4 font-mono text-slate-500 hidden sm:table-cell" x-text="'Rs. ' + marketData.priceYesterday"></td>
+            <td class="p-3 sm:p-4 font-mono font-bold" :class="marketData.changePercent >= 0 ? 'text-emerald-500' : 'text-rose-500'" x-text="(marketData.changePercent >= 0 ? '+' : '') + marketData.changePercent + '%'"></td>
         </tr>
                             </template>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </section>
         </div>
 
         <div x-show="activeTab === 'trends'" x-transition style="{{ ($initialTab ?? 'home') !== 'trends' ? 'display: none;' : '' }}">
-            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div class="flex justify-between items-center mb-6">
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                     <div>
-                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Market Trends Analytics</h2>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Market Trends Analytics</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1" x-text="'Active Chart Vector: ' + trendVeg.toUpperCase()"></p>
                     </div>
-                    <select x-model="trendVeg" @change="fetchTrendHistory()" class="bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-800 text-sm rounded-xl p-2 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                    <select x-model="trendVeg" @change="fetchTrendHistory()" class="bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-800 text-sm rounded-xl p-2 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 w-full sm:w-auto">
                         <template x-for="vegId in Object.keys(prices)" :key="vegId">
                             <option :value="vegId" x-text="(prices[vegId]?.vegetable || vegId).split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')"></option>
                         </template>
@@ -472,10 +512,10 @@
         </div>
 
         <div x-show="activeTab === 'about'" x-transition style="{{ ($initialTab ?? 'home') !== 'about' ? 'display: none;' : '' }}">
-            <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
+            <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 space-y-10 sm:space-y-16">
 
                 {{-- Hero Banner --}}
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-800 p-10 shadow-2xl shadow-emerald-900/30">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-800 p-6 sm:p-10 shadow-2xl shadow-emerald-900/30">
                     <div class="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -translate-y-20 translate-x-20"></div>
                     <div class="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-y-20 -translate-x-16"></div>
                     <div class="relative z-10">
@@ -684,17 +724,17 @@
 
     </main>
 
-    <footer class="w-full border-t border-slate-200 bg-slate-50 dark:border-t dark:border-slate-900 dark:bg-slate-950 mt-auto py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
+    <footer class="w-full border-t border-slate-200 bg-slate-50 dark:border-t dark:border-slate-900 dark:bg-slate-950 mt-auto py-6 sm:py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-4 text-xs font-mono text-slate-500 text-center md:flex-row md:justify-between md:text-left">
             <div class="text-slate-700 dark:text-slate-300">
-                <span class="text-slate-300 font-bold">Lanka Vegetable Prices</span> | Empowering Sri Lankan households with pristine market rate visibility.
+                <span class="text-slate-900 dark:text-slate-300 font-bold">Lanka Vegetable Prices</span><br class="sm:hidden"> <span class="hidden sm:inline">|</span> Empowering Sri Lankan households with pristine market rate visibility.
             </div>
-            <div class="flex gap-4">
-                <span class="hover:text-emerald-400 cursor-pointer" @click="activeTab = 'pipeline'">Admin Portal</span>
-                <span>|</span>
+            <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+                <span class="hover:text-emerald-400 cursor-pointer transition-colors" @click="activeTab = 'pipeline'">Admin Portal</span>
+                <span class="hidden sm:inline">|</span>
                 <span>© 2026 Ceylon Agriculture Hub</span>
-                <span>|</span>
-                <span class="text-emerald-400 cursor-pointer" @click="activeTab = 'rates'">Live Rates</span>
+                <span class="hidden sm:inline">|</span>
+                <span class="text-emerald-400 cursor-pointer hover:text-emerald-300 transition-colors" @click="activeTab = 'rates'">Live Rates</span>
             </div>
         </div>
     </footer>

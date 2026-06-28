@@ -65,8 +65,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <div class="lg:col-span-2 bg-[#111827] border border-gray-800 rounded-xl shadow-2xl overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-800">
-                    <h2 class="text-lg font-bold text-white">System Telemetry</h2>
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-800">
+                    <h2 class="text-base sm:text-lg font-bold text-white">System Telemetry</h2>
                 </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     @php
@@ -98,8 +98,8 @@
 
             {{-- Recent Pipeline Logs --}}
             <div class="bg-[#111827] border border-gray-800 rounded-xl shadow-2xl overflow-hidden flex flex-col">
-                <div class="px-6 py-4 border-b border-gray-800">
-                    <h2 class="text-lg font-bold text-white">Latest Pipeline Runs</h2>
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-800">
+                    <h2 class="text-base sm:text-lg font-bold text-white">Latest Pipeline Runs</h2>
                 </div>
                 <div class="flex-1 divide-y divide-gray-800 overflow-y-auto max-h-80">
                     @forelse($pipelineLogs as $log)
