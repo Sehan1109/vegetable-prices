@@ -68,10 +68,11 @@
                         </svg>
                     </button>
 
-                    <button @click="setLang('en')"
-                        class="hidden sm:inline-flex text-xs font-mono font-bold px-2.5 py-1 rounded-md border transition border-emerald-500/30 text-emerald-400 bg-emerald-950/30">
-                        EN
-                    </button>
+                    <div class="hidden sm:flex items-center gap-1 border border-emerald-500/30 rounded-md p-0.5 bg-emerald-950/30">
+                        <button @click="setLang('en')" :class="lang === 'en' ? 'bg-emerald-500 text-white' : 'text-emerald-400 hover:bg-emerald-500/20'" class="text-xs font-mono font-bold px-2.5 py-1 rounded-sm transition">EN</button>
+                        <button @click="setLang('si')" :class="lang === 'si' ? 'bg-emerald-500 text-white' : 'text-emerald-400 hover:bg-emerald-500/20'" class="text-xs font-mono font-bold px-2.5 py-1 rounded-sm transition">SI</button>
+                        <button @click="setLang('ta')" :class="lang === 'ta' ? 'bg-emerald-500 text-white' : 'text-emerald-400 hover:bg-emerald-500/20'" class="text-xs font-mono font-bold px-2.5 py-1 rounded-sm transition">TA</button>
+                    </div>
 
                     <!-- Mobile hamburger -->
                     <button @click="mobileMenuOpen = !mobileMenuOpen"
@@ -107,8 +108,13 @@
                         x-text="item.label">
                     </button>
                 </template>
-                <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center gap-3 px-4">
-                    <button @click="setLang('en')" class="text-xs font-mono font-bold px-2.5 py-1 rounded-md border transition border-emerald-500/30 text-emerald-400 bg-emerald-950/30">EN</button>
+                <div class="pt-4 pb-2 border-t border-slate-200 dark:border-slate-800 flex items-center gap-3 px-4">
+                    <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 uppercase">Language</span>
+                    <div class="flex items-center gap-1 border border-emerald-500/30 rounded-md p-0.5 bg-emerald-950/30">
+                        <button @click="setLang('en')" :class="lang === 'en' ? 'bg-emerald-500 text-white' : 'text-emerald-400 hover:bg-emerald-500/20'" class="text-xs font-mono font-bold px-3 py-1 rounded-sm transition">EN</button>
+                        <button @click="setLang('si')" :class="lang === 'si' ? 'bg-emerald-500 text-white' : 'text-emerald-400 hover:bg-emerald-500/20'" class="text-xs font-mono font-bold px-3 py-1 rounded-sm transition">SI</button>
+                        <button @click="setLang('ta')" :class="lang === 'ta' ? 'bg-emerald-500 text-white' : 'text-emerald-400 hover:bg-emerald-500/20'" class="text-xs font-mono font-bold px-3 py-1 rounded-sm transition">TA</button>
+                    </div>
                 </div>
             </div>
         </div>

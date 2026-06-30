@@ -85,6 +85,12 @@
                     return this.translations[this.lang];
                 },
 
+                init() {
+                    if (this.lang !== 'en') {
+                        this.translateFullPage(this.lang);
+                    }
+                },
+
                 setLang(newLang) {
                     this.lang = newLang;
                     safeStorage.set('lang', newLang);
@@ -93,6 +99,29 @@
                     window.history.pushState({}, '', url);
                     // Dispatch event to let child components know language changed
                     this.$dispatch('lang-changed', newLang);
+
+                    this.translateFullPage(newLang);
+                },
+
+                translateFullPage(targetLang) {
+                    if (targetLang === 'en') {
+                        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + location.hostname;
+                        window.location.reload();
+                        return;
+                    }
+
+                    const triggerGoogleTranslate = () => {
+                        const select = document.querySelector('.goog-te-combo');
+                        if (select) {
+                            select.value = targetLang;
+                            select.dispatchEvent(new Event('change'));
+                        } else {
+                            setTimeout(triggerGoogleTranslate, 300);
+                        }
+                    };
+                    
+                    triggerGoogleTranslate();
                 },
 
                 get darkMode() { return Alpine.store('theme').darkMode; }
@@ -103,5 +132,18 @@
             if(window.lucide) { lucide.createIcons(); }
         });
     </script>
+    
+    <!-- Google Translate Widget (Hidden) -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en', 
+                includedLanguages: 'en,si,ta',
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
